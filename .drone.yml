@@ -1,0 +1,68 @@
+kind: pipeline
+type: docker
+name: deployment
+
+clone:
+  disable: true
+
+steps:
+
+- name: clone
+  image: alpine/git
+  environment:
+    USERNAME:
+      from_secret: GIT_USERNAME
+    TOKEN:
+      from_secret: GIT_TOKEN
+  commands:
+    - git clone http://$USERNAME:$TOKEN@192.168.2.11/Simplex/SniperBot.git ./SniperBot
+
+- name: build
+  image: alpinelinux/docker-cli
+  environment:
+    DOCKER_HOST: tcp://192.168.2.10:2375
+  commands:
+  - docker build -t "sniperbot:latest" ./SniperBot
+  - docker tag sniperbot:latest 192.168.2.10:5000/sniperbot:latest
+  - docker push 192.168.2.10:5000/sniperbot:latest
+  when:
+    event:
+    - pull_request
+    - push
+    - custom
+    branch:
+    - main
+
+
+- name: destroy
+  image: alpinelinux/docker-cli
+  failure: ignore
+  environment:
+    DOCKER_HOST: tcp://192.168.2.10:2375
+  commands:
+  - docker stop sniperbot
+  - docker rm sniperbot
+  when:
+    event:
+    - pull_request
+    - push
+    - custom
+    branch:
+    - main
+
+- name: deploy
+  image: alpinelinux/docker-cli
+  environment:
+    DOCKER_HOST: tcp://192.168.2.10:2375
+    TOKEN:
+      from_secret: sniperbot_token
+  commands:
+  - docker pull 192.168.2.10:5000/sniperbot:latest
+  - docker run -d --name sniperbot --restart "unless-stopped" --network bridge -e "TOKEN"="$TOKEN" 192.168.2.10:5000/sniperbot:latest
+  when:
+    event:
+    - pull_request
+    - push
+    - custom
+    branch:
+    - main
