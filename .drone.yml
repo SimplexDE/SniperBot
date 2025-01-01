@@ -16,6 +16,13 @@ steps:
       from_secret: GIT_TOKEN
   commands:
     - git clone http://$USERNAME:$TOKEN@192.168.2.11/Simplex/SniperBot.git ./SniperBot
+  when:
+    event:
+    - pull_request
+    - push
+    - custom
+    branch:
+    - master
 
 - name: build
   image: alpinelinux/docker-cli
@@ -31,7 +38,7 @@ steps:
     - push
     - custom
     branch:
-    - main
+    - master
 
 
 - name: destroy
@@ -48,7 +55,7 @@ steps:
     - push
     - custom
     branch:
-    - main
+    - master
 
 - name: deploy
   image: alpinelinux/docker-cli
@@ -65,4 +72,4 @@ steps:
     - push
     - custom
     branch:
-    - main
+    - master
