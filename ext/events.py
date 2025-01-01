@@ -9,9 +9,9 @@ image_exts = [".jpg", ".png", ".jpeg"]
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-        self.last_message: discord.Message | None = None
-        self.last_sent_from_bot: discord.Message | None = None
-        self.last_sent: discord.Message | None = None
+        self.last_message = {}
+        self.last_sent_from_bot = {}
+        self.last_sent = {}
         
     @commands.Cog.listener(name="on_message")
     @commands.guild_only()
@@ -22,7 +22,11 @@ class Events(commands.Cog):
         if await Antispam().spamming(message):
             return
         
-        if self.last_message is None:
+        if not self.last_message.get(message.guild.id):
+            self.last_message[message.guild.id] = None
+        
+        
+        if self.last_message[message.guild.id] is None:
             return
         
         if len(message.content) != 1:
@@ -35,17 +39,23 @@ class Events(commands.Cog):
         
         reuse = False
         
-        if self.last_message == self.last_sent:
+        if not self.last_sent.get(message.guild.id):
+            self.last_sent[message.guild.id] = None
+            
+        if not self.last_sent_from_bot.get(message.guild.id):
+            self.last_sent_from_bot[message.guild.id] = None
+            
+        if self.last_message[message.guild.id] == self.last_sent[message.guild.id]:
             reuse = True
-        self.last_sent = self.last_message
+        self.last_sent[message.guild.id] = self.last_message[message.guild.id]
         
-        timestamp = f"{self.last_message.created_at.day}.{self.last_message.created_at.month}.{self.last_message.created_at.year} {self.last_message.created_at.hour}:{self.last_message.created_at.minute}"
-        author = f"📸 {self.last_message.author.global_name}"
-        desc = f"> {self.last_message.content}" if len(self.last_message.content) != 0 else ""
-        footer = f"🔗 #{self.last_message.channel.name} — 🕒 {timestamp}"
+        timestamp = f"{self.last_message[message.guild.id].created_at.day}.{self.last_message[message.guild.id].created_at.month}.{self.last_message[message.guild.id].created_at.year} {self.last_message[message.guild.id].created_at.hour}:{self.last_message[message.guild.id].created_at.minute}"
+        author = f"📸 {self.last_message[message.guild.id].author.global_name}"
+        desc = f"> {self.last_message[message.guild.id].content}" if len(self.last_message[message.guild.id].content) != 0 else ""
+        footer = f"🔗 #{self.last_message[message.guild.id].channel.name} — 🕒 {timestamp}"
         
         embed = discord.Embed(title="", description=desc, color=discord.Color.blue(), timestamp=datetime.datetime.now())
-        embed.set_author(name=author, icon_url=self.last_message.author.avatar if self.last_message.author.avatar is not None else self.last_message.author.default_avatar)
+        embed.set_author(name=author, icon_url=self.last_message[message.guild.id].author.avatar if self.last_message[message.guild.id].author.avatar is not None else self.last_message[message.guild.id].author.default_avatar)
         embed.set_footer(text=footer)
         
         embeds = [embed]
@@ -53,7 +63,7 @@ class Events(commands.Cog):
         i = 0
         
         if not reuse:
-            for f in os.listdir("./attachments"):
+            for f in os.listdir(f"./attachments/{message.guild.id}"):
                 if i == 0:
                     embeds.pop(0)
                     embed.set_image(url=f"attachment://{f}")
@@ -61,16 +71,16 @@ class Events(commands.Cog):
                 
                 embed_n = discord.Embed(title="", description="", color=discord.Color.blue(), timestamp=datetime.datetime.now())
                 embed_n.set_image(url=f"attachment://{f}")
-                embed_n.set_author(name=author, icon_url=self.last_message.author.avatar if self.last_message.author.avatar is not None else self.last_message.author.default_avatar)
+                embed_n.set_author(name=author, icon_url=self.last_message[message.guild.id].author.avatar if self.last_message[message.guild.id].author.avatar is not None else self.last_message[message.guild.id].author.default_avatar)
                 embed_n.set_footer(text=footer)
                 
                 if i != 0:
                     embeds.append(embed_n)
-                files.append(discord.File(f"./attachments/{f}"))
+                files.append(discord.File(f"./attachments/{message.guild.id}/{f}"))
                 i += 1
                 
         if reuse:
-            embed_urls = [embed.image.url for embed in self.last_sent_from_bot.embeds]
+            embed_urls = [embed.image.url for embed in self.last_sent_from_bot[message.guild.id].embeds]
             for url in embed_urls:
                 if i == 0:
                     embeds.pop(0)
@@ -79,14 +89,14 @@ class Events(commands.Cog):
                 
                 embed_n = discord.Embed(title="", description="", color=discord.Color.blue(), timestamp=datetime.datetime.now())
                 embed_n.set_image(url=url)
-                embed_n.set_author(name=author, icon_url=self.last_message.author.avatar if self.last_message.author.avatar is not None else self.last_message.author.default_avatar)
+                embed_n.set_author(name=author, icon_url=self.last_message[message.guild.id].author.avatar if self.last_message[message.guild.id].author.avatar is not None else self.last_message[message.guild.id].author.default_avatar)
                 embed_n.set_footer(text=footer)
                 
                 if i != 0:
                     embeds.append(embed_n)
                 i += 1
     
-        self.last_sent_from_bot = await message.channel.send(embeds=embeds, files=files if reuse is False else None)
+        self.last_sent_from_bot[message.guild.id] = await message.channel.send(embeds=embeds, files=files if reuse is False else None)
         
     @commands.Cog.listener(name="on_message_delete")
     @commands.guild_only()
@@ -96,19 +106,26 @@ class Events(commands.Cog):
         
         if not os.path.exists("./attachments"):
             os.mkdir("./attachments")
+            
+        if not os.path.exists("./attachments/{}".format(str(message.guild.id))):
+            os.mkdir("./attachments/{}".format(str(message.guild.id)))
         
-        for f in os.listdir("./attachments"):
-            os.remove(f"./attachments/{f}")
+        for f in os.listdir(f"./attachments/{str(message.guild.id)}"):
+            os.remove(f"./attachments/{str(message.guild.id)}/{f}")
         
         if message.attachments:
             i = 1
             for attachment in message.attachments:
                 if attachment.filename.endswith(tuple(image_exts)):
                     _, extension = os.path.splitext(attachment.filename)
-                    await attachment.save(fp="./attachments/{}{}".format(i, extension))
+                    await attachment.save(fp="./attachments/{}/{}{}".format(str(message.guild.id), i, extension))
                 i += 1
         
-        self.last_message = message
+        if not self.last_message.get(message.guild.id):
+            self.last_message[message.guild.id] = None
+
+        self.last_message[message.guild.id] = message
+        print(self.last_message)
     
 async def setup(bot):
     await bot.add_cog(Events(bot))
