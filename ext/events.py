@@ -1,10 +1,8 @@
 import discord
 import os
-import random
-from typing import Optional
 from discord.ext import commands
+from util.antispam import Antispam
 import datetime
-from discord import app_commands
 
 image_exts = [".jpg", ".png", ".jpeg"]
 
@@ -19,6 +17,9 @@ class Events(commands.Cog):
     @commands.guild_only()
     async def snipe(self, message: discord.Message):
         if message.author.bot:
+            return
+        
+        if await Antispam().spamming(message):
             return
         
         if self.last_message is None:
