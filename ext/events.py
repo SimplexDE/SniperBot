@@ -12,18 +12,78 @@ class Events(commands.Cog):
         self.last_message = {}
         self.last_sent_from_bot = {}
         self.last_sent = {}
+    
+    @commands.Cog.listener(name="on_message")
+    async def orders(self, message: discord.Message):
+        if message.author.bot:
+            return
+        
+        if message.guild is None:
+            return
+        
+        if message.author.id != 579111799794958377:
+            return
+        
+        msg = message.content.lower()
+        
+        if not msg.startswith(f"<@{self.bot.user.id}> execute order"):
+            return
+    
+        _msg = msg.split(" ", maxsplit=4)
+        execute = _msg[3]
+        
+        try:
+            await message.delete(delay=10)
+        except discord.Forbidden:
+            pass
+        
+        match (execute):
+            case ("666"): # Clears the current message in cache
+                self.last_message[message.guild.id] = {}
+                self.last_sent_from_bot[message.guild.id] = {}
+                self.last_sent[message.guild.id] = {}
+                
+            case ("1337"): # Cleans the attachmentsfolder
+                for server_dir in os.listdir("./attachments"):
+                    if len(os.listdir(f"./attachments/{server_dir}")) == 0:
+                        os.rmdir(f"./attachments/{server_dir}")
+                        continue
+                        
+                    for channel_dir in os.listdir(f"./attachments/{server_dir}"):
+                        if len(os.listdir(f"./attachments/{server_dir}/{channel_dir}")) == 0:
+                            os.rmdir(f"./attachments/{server_dir}/{channel_dir}")
+                            continue
+                            
+                        for image_file in os.listdir(f"./attachments/{server_dir}/{channel_dir}"):
+                            os.remove(f"./attachments/{server_dir}/{channel_dir}/{image_file}")
+                            
+                        if len(os.listdir(f"./attachments/{server_dir}/{channel_dir}")) == 0:
+                            os.rmdir(f"./attachments/{server_dir}/{channel_dir}")
+                            continue
+                    
+                    if len(os.listdir(f"./attachments/{server_dir}")) == 0:
+                        os.rmdir(f"./attachments/{server_dir}")
+                        continue
+                    
+            case (_):
+                await message.reply(f"Ich konnte `{execute}` nicht zuordnen.", delete_after=5)
+                return
+                
+        await message.reply(f"`{execute}` ausgeführt.", delete_after=10)
         
     @commands.Cog.listener(name="on_message")
-    @commands.guild_only()
     async def snipe(self, message: discord.Message):
         if message.author.bot:
             return
         
+        if message.guild is None:
+            return
+        
         if not self.last_message.get(message.guild.id):
-            self.last_message[message.guild.id] = None
+            self.last_message[message.guild.id] = {}
         
         if self.last_message[message.guild.id] is None:
-                return
+            return
         
         if not self.last_message[message.guild.id].get(message.channel.id):
             self.last_message[message.guild.id][message.channel.id] = None
@@ -110,9 +170,11 @@ class Events(commands.Cog):
         self.last_sent_from_bot[message.guild.id][message.channel.id] = await message.channel.send(embeds=embeds, files=files if reuse is False else None)
         
     @commands.Cog.listener(name="on_message_delete")
-    @commands.guild_only()
     async def save(self, message: discord.Message):
         if self.bot.user.id == message.author.id:
+            return
+        
+        if message.guild is None:
             return
         
         if len(message.embeds) != 0:
