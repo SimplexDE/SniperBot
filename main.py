@@ -25,30 +25,32 @@ class Sniper(commands.Bot):
 
     @tasks.loop(minutes=30)
     async def cleanup(self):
-        print("> Cleanup - Started")
+        print("> Cleaning...")
         for server_dir in os.listdir("./attachments"):
             if len(os.listdir(f"./attachments/{server_dir}")) == 0:
                 os.rmdir(f"./attachments/{server_dir}")
+                continue
                 
             for channel_dir in os.listdir(f"./attachments/{server_dir}"):
                 if len(os.listdir(f"./attachments/{server_dir}/{channel_dir}")) == 0:
                     os.rmdir(f"./attachments/{server_dir}/{channel_dir}")
+                    continue
                     
                 for image_file in os.listdir(f"./attachments/{server_dir}/{channel_dir}"):
                     os.remove(f"./attachments/{server_dir}/{channel_dir}/{image_file}")
                     
                 if len(os.listdir(f"./attachments/{server_dir}/{channel_dir}")) == 0:
                     os.rmdir(f"./attachments/{server_dir}/{channel_dir}")
+                    continue
             
             if len(os.listdir(f"./attachments/{server_dir}")) == 0:
                 os.rmdir(f"./attachments/{server_dir}")
-        print("> Cleanup - Complete")
+                continue
 
     @tasks.loop(minutes=60)
     async def presence_tick(self):
         choices: discord.Activity or discord.CustomActivity = [
             discord.CustomActivity(name="Sniping"),
-            discord.CustomActivity(name="Sniper"),
         ]
 
         await self.change_presence(
@@ -56,7 +58,7 @@ class Sniper(commands.Bot):
         )
 
     async def setup_hook(self):
-        pass
+        self.cleanup.start()
     
     async def on_connect(self):
         choices: discord.Activity or discord.CustomActivity = [
@@ -70,7 +72,6 @@ class Sniper(commands.Bot):
     async def on_ready(self):
         
         self.presence_tick.start()
-        self.cleanup.start()
         
         for path in paths:
             for file in os.listdir(path):
