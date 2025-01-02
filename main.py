@@ -50,7 +50,15 @@ class Sniper(commands.Bot):
     @tasks.loop(minutes=60)
     async def presence_tick(self):
         choices: discord.Activity or discord.CustomActivity = [
-            discord.CustomActivity(name="Sniping"),
+            discord.CustomActivity(name="Type s to snipe deleted messages"),
+            discord.CustomActivity(name="Stalking for deleted messages"),
+            discord.CustomActivity(name="Danke Simplex"),
+            discord.Activity(type=discord.ActivityType.playing, name="Aale und Rolltreppen"),
+            discord.Activity(type=discord.ActivityType.watching, name="Don"),
+            discord.Activity(type=discord.ActivityType.watching, name="Juox"),
+            discord.Activity(type=discord.ActivityType.watching, name="Simplex"),
+            discord.Streaming(name="Technikstube", url="https://www.youtube.com/watch?v=d1YBv2mWll0"),
+            discord.Streaming(name="Der Keller", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
         ]
 
         await self.change_presence(
@@ -62,7 +70,14 @@ class Sniper(commands.Bot):
     
     async def on_connect(self):
         choices: discord.Activity or discord.CustomActivity = [
-            discord.CustomActivity(name="¯\\_(ツ)_/¯")
+            discord.CustomActivity(name="¯\\_(ツ)_/¯"),
+            discord.CustomActivity(name="q(≧▽≦q)"),
+            discord.CustomActivity(name="(^///^)"),
+            discord.CustomActivity(name="\\^o^/"),
+            discord.CustomActivity(name="(ಥ _ ಥ)"),
+            discord.CustomActivity(name="◑﹏◐"),
+            discord.CustomActivity(name="The purpose of our lives is to be happy. — Dalai Lama"),
+            discord.CustomActivity(name="The healthiest response to life is joy. — Deepak Chopra")
         ]
 
         await self.change_presence(
