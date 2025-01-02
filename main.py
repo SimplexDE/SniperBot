@@ -47,7 +47,7 @@ class Sniper(commands.Bot):
                 os.rmdir(f"./attachments/{server_dir}")
                 continue
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(minutes=15)
     async def presence_tick(self):
         choices: discord.Activity or discord.CustomActivity = [
             discord.CustomActivity(name="Type s to snipe deleted messages"),
