@@ -4,7 +4,7 @@ from discord.ext import commands
 from util.antispam import Antispam
 import datetime
 
-image_exts = [".jpg", ".png", ".jpeg"]
+image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
