@@ -1,5 +1,6 @@
 import discord
 import os
+import pytz
 from discord.ext import commands
 from util.antispam import Antispam
 import datetime
@@ -120,7 +121,8 @@ class Events(commands.Cog):
             reuse = True
         self.last_sent[message.guild.id][message.channel.id] = self.last_message[message.guild.id][message.channel.id]
         
-        timestamp = f"{self.last_message[message.guild.id][message.channel.id].created_at.day}.{self.last_message[message.guild.id][message.channel.id].created_at.month}.{self.last_message[message.guild.id][message.channel.id].created_at.year} {self.last_message[message.guild.id][message.channel.id].created_at.hour}:{self.last_message[message.guild.id][message.channel.id].created_at.minute}"
+        tz = pytz.timezone("Europe/Berlin")
+        timestamp = datetime.datetime.now(tz).strftime("%d.%m.%Y %H:%M")
         author = f"📸 {self.last_message[message.guild.id][message.channel.id].author.global_name}"
         desc = f"> {self.last_message[message.guild.id][message.channel.id].content}" if len(self.last_message[message.guild.id][message.channel.id].content) != 0 else ""
         footer = f"🔗 #{self.last_message[message.guild.id][message.channel.id].channel.name} — 🕒 {timestamp}"

@@ -32,7 +32,6 @@ class Antispam:
             self.BLOCK_COMMANDS = True
 
         if (datetime.now() - last_message).seconds >= TIME_WINDOW_SECS:
-            print("Lifted")
             self.BLOCK_COMMANDS = False
             del cache["guilds"][guild_id]
             return
