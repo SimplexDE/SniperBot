@@ -122,7 +122,7 @@ class Events(commands.Cog):
         self.last_sent[message.guild.id][message.channel.id] = self.last_message[message.guild.id][message.channel.id]
         
         tz = pytz.timezone("Europe/Berlin")
-        timestamp = datetime.datetime.now(tz).strftime("%d.%m.%Y %H:%M")
+        timestamp = self.last_message[message.guild.id][message.channel.id].created_at.astimezone(tz).strftime("%d.%m.%Y %H:%M")
         author = f"📸 {self.last_message[message.guild.id][message.channel.id].author.global_name}"
         desc = f"> {self.last_message[message.guild.id][message.channel.id].content}" if len(self.last_message[message.guild.id][message.channel.id].content) != 0 else ""
         footer = f"🔗 #{self.last_message[message.guild.id][message.channel.id].channel.name} — 🕒 {timestamp}"
