@@ -111,7 +111,10 @@ class Sniper(commands.Bot):
                 if channel.type == discord.ChannelType.text:
                     if not self.message_cache.get(channel.id):
                         self.message_cache[channel.id] = []
-                    self.message_cache[channel.id] = [message async for message in channel.history(limit=100)]
+                    try:
+                        self.message_cache[channel.id] = [message async for message in channel.history(limit=100)]
+                    except Exception:
+                        continue
                     msgs += len(self.message_cache[channel.id])
                     text_channels_retrieved += 1
             guilds_retrieved += 1
