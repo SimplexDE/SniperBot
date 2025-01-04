@@ -66,6 +66,11 @@ class Events(commands.Cog):
                         os.rmdir(f"./attachments/{server_dir}")
                         continue
                     
+            case ("populate"):
+                if not self.message_cache.get(message.channel.id):
+                    self.message_cache[message.channel.id] = []
+                self.message_cache[message.channel.id] = [message async for message in message.channel.history(limit=100)]
+                    
             case (_):
                 await message.reply(f"Ich konnte `{execute}` nicht zuordnen.", delete_after=5)
                 return
@@ -173,6 +178,65 @@ class Events(commands.Cog):
         
     @commands.Cog.listener(name="on_message_delete")
     async def save(self, message: discord.Message):
+        if self.bot.user.id == message.author.id:
+            return
+        
+        if message.guild is None:
+            return
+        
+        if len(message.embeds) != 0:
+            return
+                
+        if not os.path.exists("./attachments"):
+            os.mkdir("./attachments")
+            
+        if not os.path.exists("./attachments/{}".format(str(message.guild.id))):
+            os.mkdir("./attachments/{}".format(str(message.guild.id)))
+            
+        if not os.path.exists("./attachments/{}/{}".format(str(message.guild.id), str(message.channel.id))):
+            os.mkdir("./attachments/{}/{}".format(str(message.guild.id), str(message.channel.id)))
+        
+        for f in os.listdir(f"./attachments/{str(message.guild.id)}/{str(message.channel.id)}"):
+            os.remove(f"./attachments/{str(message.guild.id)}/{str(message.channel.id)}/{f}")
+        
+        if message.attachments:
+            i = 1
+            for attachment in message.attachments:
+                if attachment.filename.endswith(tuple(image_exts)):
+                    _, extension = os.path.splitext(attachment.filename)
+                    await attachment.save(fp="./attachments/{}/{}/{}{}".format(str(message.guild.id), str(message.channel.id), i, extension))
+                i += 1
+        
+        if not self.last_message.get(message.guild.id):
+            self.last_message[message.guild.id] = {}
+            
+        if not self.last_message[message.guild.id].get(message.channel.id):
+            self.last_message[message.guild.id][message.channel.id] = None
+
+        self.last_message[message.guild.id][message.channel.id] = message
+        
+    @commands.Cog.listener(name="on_raw_message_delete")
+    async def save_raw(self, payload: discord.RawMessageDeleteEvent):
+        
+        message = None
+
+        if payload.cached_message is not None:
+            print("Cached Message found, aborting...")
+            return        
+        
+        channel = await self.bot.fetch_channel(payload.channel_id)
+        
+        if not self.bot.message_cache.get(channel.id):
+            return
+        
+        for msg in self.bot.message_cache[channel.id]:
+            if msg.id == payload.message_id:
+                message = msg
+                break
+        
+        if message is None:
+            return
+            
         if self.bot.user.id == message.author.id:
             return
         

@@ -22,6 +22,7 @@ class Sniper(commands.Bot):
             help_command=None,
             intents=intents
         )
+        self.message_cache = {}
 
     @tasks.loop(minutes=30)
     async def cleanup(self):
@@ -83,10 +84,8 @@ class Sniper(commands.Bot):
         await self.change_presence(
             activity=random.choice(choices), status=discord.Status.dnd
         )
-    
+
     async def on_ready(self):
-        
-        self.presence_tick.start()
         
         for path in paths:
             for file in os.listdir(path):
@@ -94,9 +93,37 @@ class Sniper(commands.Bot):
                     continue
                 if file.endswith(".py"):
                     await self.load_extension(f"{path.replace("/", ".")}{file[:-3]}")
+        
+        log_channel = self.get_channel(int(1325196683776229410))
+        _guilds = self.guilds
+        text_channels_count = 0
+        for guild in _guilds:
+            for channel in guild.channels:
+                if channel.type == discord.ChannelType.text:
+                    text_channels_count += 1
+        text_channels_retrieved = 0
+        guilds_count = len(_guilds)
+        guilds_retrieved = 0
+        msgs = 0
+        
+        for guild in _guilds:
+            for channel in guild.channels:
+                if channel.type == discord.ChannelType.text:
+                    if not self.message_cache.get(channel.id):
+                        self.message_cache[channel.id] = []
+                    self.message_cache[channel.id] = [message async for message in channel.history(limit=100)]
+                    msgs += len(self.message_cache[channel.id])
+                    text_channels_retrieved += 1
+            guilds_retrieved += 1
+                
+        await log_channel.send(f"CHANNELS: {text_channels_retrieved}/{text_channels_count} ({text_channels_retrieved / text_channels_count * 100}%)" \
+                                f"\nGUILDS: {guilds_retrieved}/{guilds_count} ({guilds_retrieved / guilds_count * 100}%)" \
+                                f"\nMESSAGES RETRIEVED: {msgs}")
     
         sync = await self.tree.sync()
         print(f"> Synced {len(sync)} commands")
+    
+        self.presence_tick.start()
     
         print(
             f"[✓] >> {self.user.name} Ready"
