@@ -1,4 +1,5 @@
 import discord
+import random
 import os
 import pytz
 from discord.ext import commands
@@ -108,6 +109,18 @@ class Events(commands.Cog):
         if await Antispam().spamming(message):
             return
         
+        colors = [
+            discord.Color.blue(),
+            discord.Color.red(),
+            discord.Color.blurple(),
+            discord.Color.gold(),
+            discord.Color.green(),
+            discord.Color.fuchsia(),
+            discord.Color.yellow(),
+            discord.Color.magenta(),
+            discord.Color.random(),
+        ]
+        
         reuse = False
         
         if not self.last_sent.get(message.guild.id):
@@ -132,7 +145,7 @@ class Events(commands.Cog):
         desc = f"> {self.last_message[message.guild.id][message.channel.id].content}" if len(self.last_message[message.guild.id][message.channel.id].content) != 0 else ""
         footer = f"🔗 #{self.last_message[message.guild.id][message.channel.id].channel.name} — 🕒 {timestamp}"
         
-        embed = discord.Embed(title="", description=desc, color=discord.Color.blue(), timestamp=datetime.datetime.now())
+        embed = discord.Embed(title="", description=desc, color=random.choice(colors), timestamp=datetime.datetime.now())
         embed.set_author(name=author, icon_url=self.last_message[message.guild.id][message.channel.id].author.avatar if self.last_message[message.guild.id][message.channel.id].author.avatar is not None else self.last_message[message.guild.id][message.channel.id].author.default_avatar)
         embed.set_footer(text=footer)
         
