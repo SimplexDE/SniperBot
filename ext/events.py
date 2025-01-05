@@ -2,6 +2,7 @@ import discord
 import random
 import os
 import pytz
+from discord import app_commands
 from discord.ext import commands
 from util.antispam import Antispam
 import datetime
@@ -14,36 +15,52 @@ class Events(commands.Cog):
         self.last_message = {}
         self.last_sent_from_bot = {}
         self.last_sent = {}
+        self.blocklist = []
     
-    @commands.Cog.listener(name="on_message")
-    async def orders(self, message: discord.Message):
-        if message.author.bot:
+    @app_commands.command(name="execute", description="Dev-Terminal")
+    async def execute(self, interaction: discord.Interaction, input: str):
+        if interaction.user.id != 579111799794958377:
+            await interaction.response.send_message("Du hast keinen Zugriff auf diesen Befehl.", ephemeral=True)
             return
         
-        if message.guild is None:
-            return
+        arguments = input.split(" ", maxsplit=3)
+        if len(arguments) >= 3:
+            arguments.pop(2)
+        print(arguments)
         
-        if message.author.id != 579111799794958377:
-            return
-        
-        msg = message.content.lower()
-        
-        if not msg.startswith(f"<@{self.bot.user.id}> execute order"):
-            return
-    
-        _msg = msg.split(" ", maxsplit=4)
-        execute = _msg[3]
-        
-        try:
-            await message.delete(delay=10)
-        except discord.Forbidden:
-            pass
-        
-        match (execute):
-            case ("666"): # Clears the current message in cache
-                self.last_message[message.guild.id] = {}
-                self.last_sent_from_bot[message.guild.id] = {}
-                self.last_sent[message.guild.id] = {}
+        match (arguments[0]):
+            case ("clear" | "666"): # Clears the current message in cache
+                self.last_message[interaction.guild.id] = {}
+                self.last_sent_from_bot[interaction.guild.id] = {}
+                self.last_sent[interaction.guild.id] = {}
+                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
+            
+            case ("say" | "tell"):
+                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
+            
+            case ("block"):
+                if len(arguments) < 2:
+                    await interaction.response.send_message(f"Zu wenig Argumente um {arguments[0]} auszuführen.", delete_after=10)
+                    return
+                
+                user = self.bot.get_user(int(arguments[1]))
+                
+                if self.blocklist.count(user.id) != 0:
+                    await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt. {user.name} ist nun geblockt.", allowed_mentions=None, delete_after=10)
+                    return
+                
+                self.blocklist.append(user.id)
+                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt. {user.name} ist nun geblockt.", allowed_mentions=None, delete_after=10)
+                
+            case ("unblock"):
+                if len(arguments) < 2:
+                    await interaction.response.send_message(f"Zu wenig Argumente um {arguments[0]} auszuführen.", delete_after=10)
+                    return
+                
+                user = self.bot.get_user(int(arguments[1]))
+                self.blocklist.pop(self.blocklist.index(user.id))
+                
+                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt. {user.name} ist nun entblockt.", allowed_mentions=None, delete_after=10)
                 
             case ("1337"): # Cleans the attachmentsfolder
                 for server_dir in os.listdir("./attachments"):
@@ -66,17 +83,17 @@ class Events(commands.Cog):
                     if len(os.listdir(f"./attachments/{server_dir}")) == 0:
                         os.rmdir(f"./attachments/{server_dir}")
                         continue
+                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
                     
             case ("populate"):
-                if not self.message_cache.get(message.channel.id):
-                    self.message_cache[message.channel.id] = []
-                self.message_cache[message.channel.id] = [message async for message in message.channel.history(limit=100)]
+                if not self.message_cache.get(interaction.channel.id):
+                    self.message_cache[interaction.channel.id] = []
+                self.message_cache[interaction.channel.id] = [message async for message in interaction.channel.history(limit=100)]
+                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
                     
             case (_):
-                await message.reply(f"Ich konnte `{execute}` nicht zuordnen.", delete_after=5)
+                await interaction.response.send_message(f"Ich konnte `{arguments[0]}` nicht zuordnen.", delete_after=10)
                 return
-                
-        await message.reply(f"`{execute}` ausgeführt.", delete_after=10)
         
     @commands.Cog.listener(name="on_message")
     async def snipe(self, message: discord.Message):
@@ -84,6 +101,9 @@ class Events(commands.Cog):
             return
         
         if message.guild is None:
+            return
+    
+        if message.author.id in self.blocklist:
             return
         
         if not self.last_message.get(message.guild.id):
@@ -194,6 +214,9 @@ class Events(commands.Cog):
         if self.bot.user.id == message.author.id:
             return
         
+        if message.author.id in self.blocklist:
+            return
+        
         if message.guild is None:
             return
         
@@ -234,7 +257,6 @@ class Events(commands.Cog):
         message = None
 
         if payload.cached_message is not None:
-            print("Cached Message found, aborting...")
             return        
         
         channel = await self.bot.fetch_channel(payload.channel_id)
