@@ -58,6 +58,7 @@ class Sniper(commands.Bot):
             discord.Activity(type=discord.ActivityType.watching, name="Don"),
             discord.Activity(type=discord.ActivityType.watching, name="Juox"),
             discord.Activity(type=discord.ActivityType.watching, name="Simplex"),
+            discord.Activity(type=discord.ActivityType.watching, name="ZS"),
             discord.Streaming(name="Technikstube", url="https://www.youtube.com/watch?v=d1YBv2mWll0"),
             discord.Streaming(name="Der Keller", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
         ]
