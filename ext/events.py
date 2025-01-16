@@ -35,9 +35,6 @@ class Events(commands.Cog):
                 self.last_sent[interaction.guild.id] = {}
                 await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
             
-            case ("say" | "tell"):
-                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
-            
             case ("block"):
                 if len(arguments) < 2:
                     await interaction.response.send_message(f"Zu wenig Argumente um {arguments[0]} auszuführen.", delete_after=10)

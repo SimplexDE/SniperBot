@@ -2,8 +2,8 @@ import discord
 
 from datetime import datetime
 
-TIME_WINDOW_SECS = 3
-MAX_MESSAGES = 5
+TIME_WINDOW_SECS = 2
+MAX_MESSAGES = 3
 
 cache = {}
 
