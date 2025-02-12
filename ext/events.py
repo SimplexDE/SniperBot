@@ -2,6 +2,7 @@ import discord
 import random
 import os
 import pytz
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from discord import app_commands
 from discord.ext import commands
 from util.antispam import Antispam
@@ -305,6 +306,63 @@ class Events(commands.Cog):
             self.last_message[message.guild.id][message.channel.id] = None
 
         self.last_message[message.guild.id][message.channel.id] = message
+        
+    @commands.Cog.listener(name="on_message")
+    async def make_that_a_quote(self, message: discord.Message):
+        mentions = message.mentions
+        
+        if self.bot.user in mentions:
+            if message.type != discord.MessageType.reply:
+                return
+            
+            ref: discord.MessageReference = message.reference
+            
+            if not ref.cached_message:
+                try:
+                    msg = await message.channel.fetch_message(ref.message_id)
+                except discord.NotFound:
+                    return
+            else:
+                msg = ref.cached_message
+            
+            avatar_path = "images\\out\\{}.png".format(msg.author.id)
+            
+            avatar = msg.author.avatar if msg.author.avatar is not None else msg.author.default_avatar
+            await avatar.save(avatar_path)
+            
+            avatar_image = Image.open(avatar_path)
+            mask_image = Image.open("images\\template.png").resize(avatar_image.size)
+            mask = Image.new("L", mask_image.size, 0)
+            
+            final = Image.composite(avatar_image, mask_image, mask)
+            
+            final.save("images\\out\\out.png")
+            
+            
+            
+            colors = [
+                discord.Color.blue(),
+                discord.Color.red(),
+                discord.Color.blurple(),
+                discord.Color.gold(),
+                discord.Color.green(),
+                discord.Color.fuchsia(),
+                discord.Color.yellow(),
+                discord.Color.magenta(),
+                discord.Color.random(),
+            ]
+            
+            tz = pytz.timezone("Europe/Berlin")
+            timestamp = msg.created_at.astimezone(tz).strftime("%d.%m.%Y %H:%M")
+            author = f"📜 {msg.author.global_name}"
+            desc = f"> {msg.content}" if len(msg.content) != 0 else ""
+            footer = f"🔗 #{msg.channel.name} — 🕒 {timestamp}"
+            
+            embed = discord.Embed(title="", description=desc, color=random.choice(colors), timestamp=datetime.datetime.now())
+            embed.set_author(name=author, icon_url=msg.author.avatar if msg.author.avatar is not None else msg.author.default_avatar, url=msg.jump_url)
+            embed.set_footer(text=footer)
+            
+            await message.reply(embed=embed, allowed_mentions=None)
     
 async def setup(bot):
     await bot.add_cog(Events(bot))
