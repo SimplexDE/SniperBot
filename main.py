@@ -53,6 +53,8 @@ class Sniper(commands.Bot):
         choices: discord.Activity or discord.CustomActivity = [
             discord.CustomActivity(name="Type s to snipe deleted messages"),
             discord.CustomActivity(name="Stalking for deleted messages"),
+            discord.CustomActivity(name="Reviewing quotes"),
+            discord.CustomActivity(name="Quoting people"),
             discord.CustomActivity(name="Danke Simplex"),
             discord.Activity(type=discord.ActivityType.playing, name="Aale und Rolltreppen"),
             discord.Activity(type=discord.ActivityType.watching, name="Don"),
@@ -113,8 +115,7 @@ class Sniper(commands.Bot):
                     if not self.message_cache.get(channel.id):
                         self.message_cache[channel.id] = []
                     try:
-                        pass
-                        # self.message_cache[channel.id] = [message async for message in channel.history(limit=100)]
+                        self.message_cache[channel.id] = [message async for message in channel.history(limit=100)]
                     except Exception:
                         continue
                     msgs += len(self.message_cache[channel.id])

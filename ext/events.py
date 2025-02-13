@@ -1,5 +1,6 @@
 import discord
 import random
+import re
 import os
 import pytz
 import textwrap
@@ -311,13 +312,21 @@ class Events(commands.Cog):
     def truncate_text(self, text, max_chars=100, suffix="..."):
         return text[:max_chars] + suffix if len(text) > max_chars else text
     
-    def replace_mentions(self, text, user_mentions, role_mentions, channel_mentions):
-        
-        mentions = user_mentions + role_mentions + channel_mentions
+    async def replace_mentions(self, text: str, guild: discord.Guild):        
+        pattern = "<(@|#|@&?)(\\d+)>"
+        mentions = re.findall(pattern, text)
         
         for mention in mentions:
-            # TODO: Replace <@579111799794958377> with actual usernames / display names
-            pass
+            match (mention[0]):
+                case ("@&"):
+                    text = text.replace(f"<{mention[0] + str(mention[1])}>", f"@{guild.get_role(int(mention[1])).name}")      
+                case ("@"):
+                    text = text.replace(f"<{mention[0] + str(mention[1])}>", f"@{guild.get_member(int(mention[1])).name}")
+                case ("#"):
+                    text = text.replace(f"<{mention[0] + str(mention[1])}>", f"#{guild.get_channel(int(mention[1])).name}") 
+                case (_):
+                    continue
+
         return text
     
     @commands.Cog.listener(name="on_message")
@@ -362,7 +371,7 @@ class Events(commands.Cog):
             
             draw = ImageDraw.Draw(background)
             
-            message_text = self.replace_mentions(msg.content, msg.mentions, msg.role_mentions, msg.channel_mentions)
+            message_text = await self.replace_mentions(msg.content, message.guild)
             final_message = "\n".join(textwrap.wrap(message_text, 25))
             final_message = self.truncate_text(final_message)
             

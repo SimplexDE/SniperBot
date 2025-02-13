@@ -7,13 +7,6 @@ class Commands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
     
-    @app_commands.command(name="quote", description="Make any message to a quote")
-    async def make_that_a_quote(self, interaction: discord.Interaction):
-        
-        msg = await interaction.message
-        
-        await interaction.response.send_message(msg.content)
-    
     @app_commands.command(name="about", description="About me")
     async def about(self, interaction: discord.Interaction):
         DEV = self.bot.get_user(579111799794958377)
