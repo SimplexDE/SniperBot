@@ -113,7 +113,8 @@ class Sniper(commands.Bot):
                     if not self.message_cache.get(channel.id):
                         self.message_cache[channel.id] = []
                     try:
-                        self.message_cache[channel.id] = [message async for message in channel.history(limit=100)]
+                        pass
+                        # self.message_cache[channel.id] = [message async for message in channel.history(limit=100)]
                     except Exception:
                         continue
                     msgs += len(self.message_cache[channel.id])
