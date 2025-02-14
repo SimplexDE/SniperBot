@@ -367,7 +367,7 @@ class Events(commands.Cog):
             FONT_SMALL = ImageFont.truetype(font=f"{FONTS_SRC}arial.ttf", size=18)
             FONT_XSMALL = ImageFont.truetype(font=f"{FONTS_SRC}arial.ttf", size=12)
             
-            mask = Image.open(f"{IMAGES_SRC}template.png")
+            mask = Image.open(f"{IMAGES_SRC}mask.png")
             background = Image.new("RGBA", BACKGROUND_SIZE, color=(0,0,0))
             avatar_image = Image.open(avatar_path).resize(AVATAR_SIZE)
             background.paste(avatar_image, mask=mask.convert("L").resize(AVATAR_SIZE))
