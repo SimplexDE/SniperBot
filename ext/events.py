@@ -226,13 +226,13 @@ class Events(commands.Cog):
         if len(message.embeds) != 0:
             return
                 
-        if not os.path.exists("{ATTACHMENTS_SRC}"):
-            os.mkdir("{ATTACHMENTS_SRC}")
+        if not os.path.exists(ATTACHMENTS_SRC):
+            os.mkdir(ATTACHMENTS_SRC)
             
         if not os.path.exists("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id))):
             os.mkdir("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id)))
             
-        if not os.path.exists("{}{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id))):
+        if not os.path.exists("{}/{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id))):
             os.mkdir("{}/{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id)))
         
         for f in os.listdir(f"{ATTACHMENTS_SRC}/{str(message.guild.id)}/{str(message.channel.id)}"):
@@ -284,8 +284,8 @@ class Events(commands.Cog):
         if len(message.embeds) != 0:
             return
                 
-        if not os.path.exists("{ATTACHMENTS_SRC}"):
-            os.mkdir("{ATTACHMENTS_SRC}")
+        if not os.path.exists(ATTACHMENTS_SRC):
+            os.mkdir(ATTACHMENTS_SRC)
             
         if not os.path.exists("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id))):
             os.mkdir("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id)))
