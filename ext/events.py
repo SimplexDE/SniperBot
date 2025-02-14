@@ -355,8 +355,8 @@ class Events(commands.Cog):
                 await message.reply("> :warning: Roboter zitiert man nicht! :robot:", allowed_mentions=None, delete_after=5)
                 return
             
-            if not os.path.exists("{IMAGES_SRC}/out"):
-                os.mkdir("{IMAGES_SRC}/out")
+            if not os.path.exists(f"{IMAGES_SRC}/out"):
+                os.mkdir(f"{IMAGES_SRC}/out")
             
             avatar_path = "images/out/avatar.png"
             
