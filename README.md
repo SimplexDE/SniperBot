@@ -7,6 +7,8 @@ Just with the simple message of `s` Spongiper will give you the message that was
 
 Spongiper even does temporarily save images that were deleted with the last message.
 
+Spongiper also includes the functionality to make something into a "Quote", just reply to the message you want to be a quote and mention Spongiper!
+
 (insert image here)
 
 **Spongiper has you covered on never loosing any message.**
