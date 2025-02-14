@@ -11,9 +11,9 @@ from util.antispam import Antispam
 import datetime
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
-FONTS_SRC = ".\\fonts\\"
-IMAGES_SRC = ".\\images\\"
-ATTACHMENTS_SRC = ".\\attachments\\"
+FONTS_SRC = "./fonts"
+IMAGES_SRC = "./images"
+ATTACHMENTS_SRC = "./attachments"
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -66,25 +66,25 @@ class Events(commands.Cog):
                 await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt. {user.name} ist nun entblockt.", allowed_mentions=None, delete_after=10)
                 
             case ("1337"): # Cleans the attachmentsfolder
-                for server_dir in os.listdir(f"{ATTACHMENTS_SRC}"):
-                    if len(os.listdir(f"{ATTACHMENTS_SRC}{server_dir}")) == 0:
-                        os.rmdir(f"{ATTACHMENTS_SRC}{server_dir}")
+                for server_dir in os.listdir(f"{ATTACHMENTS_SRC}/"):
+                    if len(os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}")) == 0:
+                        os.rmdir(f"{ATTACHMENTS_SRC}/{server_dir}")
                         continue
                         
                     for channel_dir in os.listdir(f"{ATTACHMENTS_SRC}{server_dir}"):
-                        if len(os.listdir(f"{ATTACHMENTS_SRC}{server_dir}\\{channel_dir}")) == 0:
-                            os.rmdir(f"{ATTACHMENTS_SRC}{server_dir}\\{channel_dir}")
+                        if len(os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}")) == 0:
+                            os.rmdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}")
                             continue
                             
-                        for image_file in os.listdir(f"{ATTACHMENTS_SRC}{server_dir}\\{channel_dir}"):
-                            os.remove(f"{ATTACHMENTS_SRC}{server_dir}\\{channel_dir}\\{image_file}")
+                        for image_file in os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}"):
+                            os.remove(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}/{image_file}")
                             
-                        if len(os.listdir(f"{ATTACHMENTS_SRC}{server_dir}\\{channel_dir}")) == 0:
-                            os.rmdir(f"{ATTACHMENTS_SRC}{server_dir}\\{channel_dir}")
+                        if len(os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}")) == 0:
+                            os.rmdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}")
                             continue
                     
-                    if len(os.listdir(f"{ATTACHMENTS_SRC}{server_dir}")) == 0:
-                        os.rmdir(f"{ATTACHMENTS_SRC}{server_dir}")
+                    if len(os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}")) == 0:
+                        os.rmdir(f"{ATTACHMENTS_SRC}/{server_dir}")
                         continue
                 await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
                     
@@ -177,7 +177,7 @@ class Events(commands.Cog):
         i = 0
         
         if not reuse:
-            for f in os.listdir(f"{ATTACHMENTS_SRC}{message.guild.id}/{message.channel.id}"):
+            for f in os.listdir(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}"):
                 if i == 0:
                     embeds.pop(0)
                     embed.set_image(url=f"attachment://{f}")
@@ -190,7 +190,7 @@ class Events(commands.Cog):
                 
                 if i != 0:
                     embeds.append(embed_n)
-                files.append(discord.File(f"{ATTACHMENTS_SRC}{message.guild.id}\\{message.channel.id}\\{f}"))
+                files.append(discord.File(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}/{f}"))
                 i += 1
                 
         if reuse:
@@ -229,21 +229,21 @@ class Events(commands.Cog):
         if not os.path.exists("{ATTACHMENTS_SRC}"):
             os.mkdir("{ATTACHMENTS_SRC}")
             
-        if not os.path.exists("{}{}".format(ATTACHMENTS_SRC, str(message.guild.id))):
-            os.mkdir("{}{}".format(ATTACHMENTS_SRC, str(message.guild.id)))
+        if not os.path.exists("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id))):
+            os.mkdir("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id)))
             
         if not os.path.exists("{}{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id))):
-            os.mkdir("{}{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id)))
+            os.mkdir("{}/{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id)))
         
-        for f in os.listdir(f"{ATTACHMENTS_SRC}{str(message.guild.id)}/{str(message.channel.id)}"):
-            os.remove(f"{ATTACHMENTS_SRC}{str(message.guild.id)}/{str(message.channel.id)}/{f}")
+        for f in os.listdir(f"{ATTACHMENTS_SRC}/{str(message.guild.id)}/{str(message.channel.id)}"):
+            os.remove(f"{ATTACHMENTS_SRC}/{str(message.guild.id)}/{str(message.channel.id)}/{f}")
         
         if message.attachments:
             i = 1
             for attachment in message.attachments:
                 if attachment.filename.endswith(tuple(image_exts)):
                     _, extension = os.path.splitext(attachment.filename)
-                    await attachment.save(fp="{}{}/{}/{}{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id), i, extension))
+                    await attachment.save(fp="{}/{}/{}/{}{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id), i, extension))
                 i += 1
         
         if not self.last_message.get(message.guild.id):
@@ -287,21 +287,21 @@ class Events(commands.Cog):
         if not os.path.exists("{ATTACHMENTS_SRC}"):
             os.mkdir("{ATTACHMENTS_SRC}")
             
-        if not os.path.exists("{}{}".format(ATTACHMENTS_SRC, str(message.guild.id))):
-            os.mkdir("{}{}".format(ATTACHMENTS_SRC, str(message.guild.id)))
+        if not os.path.exists("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id))):
+            os.mkdir("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id)))
             
-        if not os.path.exists("{}{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id))):
-            os.mkdir("{}{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id)))
+        if not os.path.exists("{}/{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id))):
+            os.mkdir("{}/{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id)))
         
-        for f in os.listdir(f"{ATTACHMENTS_SRC}{str(message.guild.id)}/{str(message.channel.id)}"):
-            os.remove(f"{ATTACHMENTS_SRC}{str(message.guild.id)}/{str(message.channel.id)}/{f}")
+        for f in os.listdir(f"{ATTACHMENTS_SRC}/{str(message.guild.id)}/{str(message.channel.id)}"):
+            os.remove(f"{ATTACHMENTS_SRC}/{str(message.guild.id)}/{str(message.channel.id)}/{f}")
         
         if message.attachments:
             i = 1
             for attachment in message.attachments:
                 if attachment.filename.endswith(tuple(image_exts)):
                     _, extension = os.path.splitext(attachment.filename)
-                    await attachment.save(fp="{}{}/{}/{}{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id), i, extension))
+                    await attachment.save(fp="{}/{}/{}/{}{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id), i, extension))
                 i += 1
         
         if not self.last_message.get(message.guild.id):
@@ -355,7 +355,7 @@ class Events(commands.Cog):
                 await message.reply("> :warning: Roboter zitiert man nicht! :robot:", allowed_mentions=None, delete_after=5)
                 return
             
-            avatar_path = "images\\out\\avatar.png"
+            avatar_path = "images/out/avatar.png"
             
             avatar = msg.author.display_avatar if msg.author.display_avatar is not None else msg.author.default_avatar
             await avatar.save(avatar_path)
@@ -363,11 +363,11 @@ class Events(commands.Cog):
             AVATAR_SIZE = (256, 256)
             BACKGROUND_SIZE = (256*2, 256)
             
-            FONT_LARGE = ImageFont.truetype(font=f"{FONTS_SRC}arial.ttf", size=24)
-            FONT_SMALL = ImageFont.truetype(font=f"{FONTS_SRC}arial.ttf", size=18)
-            FONT_XSMALL = ImageFont.truetype(font=f"{FONTS_SRC}arial.ttf", size=12)
+            FONT_LARGE = ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=24)
+            FONT_SMALL = ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=18)
+            FONT_XSMALL = ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=12)
             
-            mask = Image.open(f"{IMAGES_SRC}mask.png")
+            mask = Image.open(f"{IMAGES_SRC}/mask.png")
             background = Image.new("RGBA", BACKGROUND_SIZE, color=(0,0,0))
             avatar_image = Image.open(avatar_path).resize(AVATAR_SIZE)
             background.paste(avatar_image, mask=mask.convert("L").resize(AVATAR_SIZE))
@@ -390,7 +390,7 @@ class Events(commands.Cog):
             draw.text((512 / 2 - textbox_middle_S[0] + 90, 256 / 2 - textbox_middle_S[1] + 90), font=FONT_SMALL, text=msg.author.display_name, fill="white", align="center")
             draw.text((512 / 2 - textbox_middle_XS[0] + 90, 256 / 2 - textbox_middle_S[1] + 110), font=FONT_XSMALL, text=msg.author.name, fill="gray", align="center")
             
-            background.save(f"{IMAGES_SRC}out\\out.png")
+            background.save(f"{IMAGES_SRC}/out/out.png")
             
             colors = [
                 discord.Color.blue(),
@@ -404,7 +404,7 @@ class Events(commands.Cog):
                 discord.Color.random(),
             ]
             
-            attachment = discord.File(f"{IMAGES_SRC}out\\out.png")
+            attachment = discord.File(f"{IMAGES_SRC}/out/out.png")
             
             tz = pytz.timezone("Europe/Berlin")
             timestamp = msg.created_at.astimezone(tz).strftime("%d.%m.%Y %H:%M")
