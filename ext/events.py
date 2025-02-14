@@ -355,6 +355,9 @@ class Events(commands.Cog):
                 await message.reply("> :warning: Roboter zitiert man nicht! :robot:", allowed_mentions=None, delete_after=5)
                 return
             
+            if not os.path.exists("{IMAGES_SRC}/out"):
+                os.mkdir("{IMAGES_SRC}/out")
+            
             avatar_path = "images/out/avatar.png"
             
             avatar = msg.author.display_avatar if msg.author.display_avatar is not None else msg.author.default_avatar
@@ -389,9 +392,6 @@ class Events(commands.Cog):
             draw.text((512 / 2 - textbox_middle_L[0] + 90, 256 / 2 - textbox_middle_L[1]), font=FONT_LARGE, text=f"„{final_message}“", fill="white", align="center")
             draw.text((512 / 2 - textbox_middle_S[0] + 90, 256 / 2 - textbox_middle_S[1] + 90), font=FONT_SMALL, text=msg.author.display_name, fill="white", align="center")
             draw.text((512 / 2 - textbox_middle_XS[0] + 90, 256 / 2 - textbox_middle_S[1] + 110), font=FONT_XSMALL, text=msg.author.name, fill="gray", align="center")
-            
-            if not os.path.exists("{IMAGES_SRC}/out"):
-                os.mkdir("{IMAGES_SRC}/out")
             
             background.save(f"{IMAGES_SRC}/out/out.png")
             
