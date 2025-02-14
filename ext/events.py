@@ -6,6 +6,7 @@ import pytz
 import textwrap
 from PIL import Image, ImageDraw, ImageFont
 from discord import app_commands
+from unidecode import unidecode
 from discord.ext import commands
 from util.antispam import Antispam
 import datetime
@@ -315,7 +316,7 @@ class Events(commands.Cog):
     def truncate_text(self, text, max_chars=100, suffix="..."):
         return text[:max_chars] + suffix if len(text) > max_chars else text
     
-    async def replace_mentions(self, text: str, guild: discord.Guild):        
+    def replace_mentions(self, text: str, guild: discord.Guild):        
         pattern = "<(@|#|@&?)(\\d+)>"
         mentions = re.findall(pattern, text)
         
@@ -331,6 +332,9 @@ class Events(commands.Cog):
                     continue
 
         return text
+    
+    def normalize_text(self, text: str):
+        return unidecode(text)
     
     @commands.Cog.listener(name="on_message")
     async def make_that_a_quote(self, message: discord.Message):
@@ -377,12 +381,13 @@ class Events(commands.Cog):
             
             draw = ImageDraw.Draw(background)
             
-            message_text = await self.replace_mentions(msg.content, message.guild)
+            message_text = self.replace_mentions(msg.content, message.guild)
+            message_text = self.normalize_text(message_text)
             final_message = "\n".join(textwrap.wrap(message_text, 25))
             final_message = self.truncate_text(final_message)
             
             textbox_LARGE = draw.textbbox((0, 0), text=f"„{final_message}“", font=FONT_LARGE)
-            textbox_SMALL = draw.textbbox((0, 0), text=msg.author.display_name, font=FONT_SMALL)
+            textbox_SMALL = draw.textbbox((0, 0), text=self.normalize_text(msg.author.display_name), font=FONT_SMALL)
             textbox_XSMALL = draw.textbbox((0, 0), text=msg.author.name, font=FONT_XSMALL)
 
             textbox_middle_L = (textbox_LARGE[2] / 2, textbox_LARGE[3] / 2)
@@ -390,8 +395,8 @@ class Events(commands.Cog):
             textbox_middle_XS = (textbox_XSMALL[2] / 2, textbox_XSMALL[3] / 2)
             
             draw.text((512 / 2 - textbox_middle_L[0] + 90, 256 / 2 - textbox_middle_L[1]), font=FONT_LARGE, text=f"„{final_message}“", fill="white", align="center")
-            draw.text((512 / 2 - textbox_middle_S[0] + 90, 256 / 2 - textbox_middle_S[1] + 90), font=FONT_SMALL, text=msg.author.display_name, fill="white", align="center")
-            draw.text((512 / 2 - textbox_middle_XS[0] + 90, 256 / 2 - textbox_middle_S[1] + 110), font=FONT_XSMALL, text=msg.author.name, fill="gray", align="center")
+            draw.text((512 / 2 - textbox_middle_S[0] + 90, 256 / 2 - textbox_middle_S[1] + 90), font=FONT_SMALL, text=self.normalize_text(msg.author.display_name), fill="white", align="center")
+            draw.text((512 / 2 - textbox_middle_XS[0] + 90, 256 / 2 - textbox_middle_S[1] + 115), font=FONT_XSMALL, text=msg.author.name, fill="gray", align="center")
             
             background.save(f"{IMAGES_SRC}/out/out.png")
             
