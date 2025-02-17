@@ -77,6 +77,32 @@ class Commands(commands.Cog):
         
         await interaction.response.send_message(embed=embed)
         
+    @app_commands.command(name="quotechannel", description="Set the Quote channel")
+    @app_commands.default_permissions(manage_channels=True)
+    async def quote(self, interaction: discord.Interaction, channel: discord.TextChannel):
+        
+        db_guild = await self.client.get_guild(interaction.guild.id)
+        settings = db_guild.settings
+        
+        embed = discord.Embed(
+            title="Quote Settings",
+            description="",
+            color=discord.Color.blue(),
+            timestamp=datetime.now()
+        )
+        embed.add_field(
+            name="<:helioschevronright:1267515447406887014> Quote-Channel",
+            value=f"> - {channel.mention} <:edit:1210725875625099304>",
+            inline=False
+        )
+        
+        settings["quote_channel"] = channel.id
+        
+        db_guild.settings = settings
+        
+        await interaction.response.send_message(embed=embed)
+
+
     @app_commands.command(name="stars", description="Set the needed stars")
     @app_commands.default_permissions(manage_channels=True)
     async def stars(self, interaction: discord.Interaction, stars: int):

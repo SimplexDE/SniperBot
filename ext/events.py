@@ -363,6 +363,8 @@ class Events(commands.Cog):
                 await message.reply("> :warning: Roboter zitiert man nicht! :robot:", allowed_mentions=None, delete_after=5)
                 return
             
+            origin = await message.reply("Wird generiert...")
+            
             if not os.path.exists(f"{IMAGES_SRC}/out"):
                 os.mkdir(f"{IMAGES_SRC}/out")
             
@@ -429,7 +431,17 @@ class Events(commands.Cog):
             embed.set_footer(text=footer)
             embed.set_image(url="attachment://out.png")
             
-            await message.reply(embed=embed, allowed_mentions=None, file=attachment)
+            db_guild = await self.client.get_guild(message.guild.id)
+            settings = db_guild.settings
+
+            channel = message.channel
+
+            if "quote_channel" in settings:
+                channel = self.bot.get_channel(settings["quote_channel"])
+            
+            await origin.delete(delay=1)
+            quote = await channel.send(embed=embed, allowed_mentions=None, file=attachment)
+            await message.reply(f"Zitat erstellt: {quote.jump_url}", silent=True, delete_after=5)
             
     @commands.Cog.listener(name="on_raw_reaction_add")
     async def star_added_raw(self, payload: discord.RawReactionActionEvent):
