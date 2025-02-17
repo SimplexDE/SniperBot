@@ -9,6 +9,8 @@ from discord import app_commands
 from unidecode import unidecode
 from discord.ext import commands
 from util.antispam import Antispam
+from util.starboard import Starboard
+from database.mongoclient import SpongiperClient
 import datetime
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
@@ -19,6 +21,8 @@ ATTACHMENTS_SRC = "./attachments"
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
+        self.starboard: Starboard = Starboard(bot)
+        self.client: SpongiperClient = SpongiperClient(bot)
         self.last_message = {}
         self.last_sent_from_bot = {}
         self.last_sent = {}
@@ -426,6 +430,26 @@ class Events(commands.Cog):
             embed.set_image(url="attachment://out.png")
             
             await message.reply(embed=embed, allowed_mentions=None, file=attachment)
+            
+    @commands.Cog.listener(name="on_raw_reaction_add")
+    async def star_added_raw(self, payload: discord.RawReactionActionEvent):
+        await self.starboard.process(payload)
+    
+    @commands.Cog.listener(name="on_raw_reaction_remove")
+    async def star_remove_raw(self, payload: discord.RawReactionActionEvent):
+        await self.starboard.process(payload)
+        
+    @commands.Cog.listener(name="on_raw_reaction_clear")
+    async def star_clear_raw(self, payload: discord.RawReactionActionEvent):
+        await self.starboard.process(payload)
+        
+    @commands.Cog.listener(name="on_raw_reaction_clear_emoji")
+    async def star_clear_emoji_raw(self, payload: discord.RawReactionActionEvent):
+        await self.starboard.process(payload)
+        
+    @commands.Cog.listener(name="on_guild_remove")
+    async def guild_remove(self, guild: discord.Guild):
+        self.client.delete_guild(guild.id)
     
 async def setup(bot):
     await bot.add_cog(Events(bot))
