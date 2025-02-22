@@ -9,6 +9,10 @@ class Commands(commands.Cog):
         self.bot: commands.Bot = bot
         self.client: SpongiperClient = SpongiperClient(bot)
     
+    starboard = app_commands.Group(name="starboard", description="Manage the guilds Starboard Settings")
+    
+    quote = app_commands.Group(name="quote", description="Manage the guilds Quote Settings")
+    
     @app_commands.command(name="about", description="About me")
     async def about(self, interaction: discord.Interaction):
         DEV = self.bot.get_user(579111799794958377)
@@ -41,10 +45,44 @@ class Commands(commands.Cog):
         embed.set_footer(text="Licsensed under MIT", icon_url=self.bot.user.avatar.url)
         
         await interaction.response.send_message(embed=embed)
-        
-    @app_commands.command(name="starboard", description="Set the Starboard channel")
+    
+    @starboard.command(name="unset", description="Disable the Starboard")
     @app_commands.default_permissions(manage_channels=True)
-    async def starboard(self, interaction: discord.Interaction, channel: discord.TextChannel):
+    async def starboard_unset(self, interaction: discord.Interaction):
+        db_guild = await self.client.get_guild(interaction.guild.id)
+        settings = db_guild.settings
+    
+        settings["starboard_channel"] = None
+        
+        if "stars" not in settings:
+            settings["stars"] = 3
+        
+        stars = settings["stars"]
+        
+        embed = discord.Embed(
+            title="Starboard",
+            description="",
+            color=discord.Color.blue(),
+            timestamp=datetime.now()
+        )
+        embed.add_field(
+            name="<:helioschevronright:1267515447406887014> Starboard-Channel",
+            value="> - `N/A` <:edit:1210725875625099304>",
+            inline=False
+        )
+        embed.add_field(
+            name="<:heliosmedal:1267515459012657245> Stars needed per Message",
+            value=f"> - {stars} :star:",
+            inline=False
+        )
+        
+        db_guild.settings = settings
+        
+        await interaction.response.send_message(embed=embed)
+    
+    @starboard.command(name="set", description="Set the Starboard channel (& activate)")
+    @app_commands.default_permissions(manage_channels=True)
+    async def starboard_set(self, interaction: discord.Interaction, channel: discord.TextChannel):
         
         db_guild = await self.client.get_guild(interaction.guild.id)
         settings = db_guild.settings
@@ -77,15 +115,15 @@ class Commands(commands.Cog):
         
         await interaction.response.send_message(embed=embed)
         
-    @app_commands.command(name="quotechannel", description="Set the Quote channel")
+    @quote.command(name="set", description="Disable the Quoting")
     @app_commands.default_permissions(manage_channels=True)
-    async def quote(self, interaction: discord.Interaction, channel: discord.TextChannel):
+    async def quote_set(self, interaction: discord.Interaction, channel: discord.TextChannel):
         
         db_guild = await self.client.get_guild(interaction.guild.id)
         settings = db_guild.settings
         
         embed = discord.Embed(
-            title="Quote Settings",
+            title="Quote",
             description="",
             color=discord.Color.blue(),
             timestamp=datetime.now()
@@ -101,9 +139,34 @@ class Commands(commands.Cog):
         db_guild.settings = settings
         
         await interaction.response.send_message(embed=embed)
+        
+    @quote.command(name="unset", description="Set the Quote channel (& activate)")
+    @app_commands.default_permissions(manage_channels=True)
+    async def quote_unset(self, interaction: discord.Interaction):
+        
+        db_guild = await self.client.get_guild(interaction.guild.id)
+        settings = db_guild.settings
+        
+        embed = discord.Embed(
+            title="Quote",
+            description="",
+            color=discord.Color.blue(),
+            timestamp=datetime.now()
+        )
+        embed.add_field(
+            name="<:helioschevronright:1267515447406887014> Quote-Channel",
+            value="> - `N/A` <:edit:1210725875625099304>",
+            inline=False
+        )
+        
+        settings["quote_channel"] = None
+        
+        db_guild.settings = settings
+        
+        await interaction.response.send_message(embed=embed)
 
 
-    @app_commands.command(name="stars", description="Set the needed stars")
+    @starboard.command(name="stars", description="Set the needed stars")
     @app_commands.default_permissions(manage_channels=True)
     async def stars(self, interaction: discord.Interaction, stars: int):
         
