@@ -1,6 +1,6 @@
 # Privacy Policy / Datenschutzerklärung
 
-Diese Privacy-Policy (Datenschutzerklärung) gibt Auskunft über die Speicherung von Daten des Spongiper, ein Discord-Bot, der gelöschte Nachrichten speichert um diese auf Anforderung wiederzugeben.
+Diese Privacy-Policy (Datenschutzerklärung) gibt Auskunft über die Speicherung von Daten des Spongiper, ein Discord-Bot, der gelöschte Nachrichten speichert um diese auf Anforderung wiederzugeben, Nachrichten in "Zitat" Bilder umwandelt und eine sogenannte "Starboard"-Funkionalität bereitstellt.
 Die Applikation ist begrenzt als Discord-Bot auf Daten, die Discord bereitstellt. Bei Nutzung des Bots stimmt man automatisch dem Folgendem zu.
 
 ## Zugriff auf Daten
@@ -11,6 +11,7 @@ Die Daten werden **keinen** Drittanbietern zur Verfügung gestellt, außer es is
 ## Speicherung der Daten
 
 Es werden temporär, Nutzer-, Nachricht- und Guild-ID's sowie Nachrichteninhalte darunter auch Bilder zwischengespeichert. Diese werden zur Funktionalität des Bots genutzt, werden jedoch nach maximal 60 Minuten gelöscht.
+Es werden "permanent"(Siehe 'Rechte der Nutzer') individuelle Kanal-IDs sowie Nachrichten-IDs gespeichert um die Funktionalität des Bots zu gewährleisten.
 Die Daten werden auf einem Server gespeichert, der vor fremdzugriffen geschützt ist.
 
 Im Falle eines Datenlecks übernimmt der Entwickler des Bots keine Haftung.
