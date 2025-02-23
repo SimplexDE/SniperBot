@@ -5,7 +5,6 @@ import os
 import pytz
 import textwrap
 from PIL import Image, ImageDraw, ImageFont
-from discord import app_commands
 from unidecode import unidecode
 from discord.ext import commands
 from util.antispam import Antispam
@@ -26,82 +25,6 @@ class Events(commands.Cog):
         self.last_message = {}
         self.last_sent_from_bot = {}
         self.last_sent = {}
-        self.blocklist = []
-    
-    @app_commands.command(name="execute", description="Dev-Terminal")
-    async def execute(self, interaction: discord.Interaction, input: str):
-        if interaction.user.id != 579111799794958377:
-            await interaction.response.send_message("Du hast keinen Zugriff auf diesen Befehl.", ephemeral=True)
-            return
-        
-        arguments = input.split(" ", maxsplit=3)
-        if len(arguments) >= 3:
-            arguments.pop(2)
-        print(arguments)
-        
-        match (arguments[0]):
-            case ("clear" | "666"): # Clears the current message in cache
-                self.last_message[interaction.guild.id] = {}
-                self.last_sent_from_bot[interaction.guild.id] = {}
-                self.last_sent[interaction.guild.id] = {}
-                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
-            
-            case ("block"):
-                if len(arguments) < 2:
-                    await interaction.response.send_message(f"Zu wenig Argumente um {arguments[0]} auszuführen.", delete_after=10)
-                    return
-                
-                user = self.bot.get_user(int(arguments[1]))
-                
-                if self.blocklist.count(user.id) != 0:
-                    await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt. {user.name} ist nun geblockt.", allowed_mentions=None, delete_after=10)
-                    return
-                
-                self.blocklist.append(user.id)
-                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt. {user.name} ist nun geblockt.", allowed_mentions=None, delete_after=10)
-                
-            case ("unblock"):
-                if len(arguments) < 2:
-                    await interaction.response.send_message(f"Zu wenig Argumente um {arguments[0]} auszuführen.", delete_after=10)
-                    return
-                
-                user = self.bot.get_user(int(arguments[1]))
-                self.blocklist.pop(self.blocklist.index(user.id))
-                
-                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt. {user.name} ist nun entblockt.", allowed_mentions=None, delete_after=10)
-                
-            case ("1337"): # Cleans the attachmentsfolder
-                for server_dir in os.listdir(f"{ATTACHMENTS_SRC}/"):
-                    if len(os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}")) == 0:
-                        os.rmdir(f"{ATTACHMENTS_SRC}/{server_dir}")
-                        continue
-                        
-                    for channel_dir in os.listdir(f"{ATTACHMENTS_SRC}{server_dir}"):
-                        if len(os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}")) == 0:
-                            os.rmdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}")
-                            continue
-                            
-                        for image_file in os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}"):
-                            os.remove(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}/{image_file}")
-                            
-                        if len(os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}")) == 0:
-                            os.rmdir(f"{ATTACHMENTS_SRC}/{server_dir}/{channel_dir}")
-                            continue
-                    
-                    if len(os.listdir(f"{ATTACHMENTS_SRC}/{server_dir}")) == 0:
-                        os.rmdir(f"{ATTACHMENTS_SRC}/{server_dir}")
-                        continue
-                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
-                    
-            case ("populate"):
-                if not self.message_cache.get(interaction.channel.id):
-                    self.message_cache[interaction.channel.id] = []
-                self.message_cache[interaction.channel.id] = [message async for message in interaction.channel.history(limit=100)]
-                await interaction.response.send_message(f"Ich habe `{arguments[0]}` ausgeführt.", delete_after=10)
-                    
-            case (_):
-                await interaction.response.send_message(f"Ich konnte `{arguments[0]}` nicht zuordnen.", delete_after=10)
-                return
         
     @commands.Cog.listener(name="on_message")
     async def snipe(self, message: discord.Message):
