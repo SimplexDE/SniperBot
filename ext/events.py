@@ -11,6 +11,7 @@ from util.antispam import Antispam
 from util.starboard import Starboard
 from database.mongoclient import SpongiperClient
 import datetime
+from ext.developer import blocklist
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
 FONTS_SRC = "./fonts"
@@ -25,6 +26,7 @@ class Events(commands.Cog):
         self.last_message = {}
         self.last_sent_from_bot = {}
         self.last_sent = {}
+        self.blocklist = blocklist
         
     @commands.Cog.listener(name="on_message")
     async def snipe(self, message: discord.Message):
