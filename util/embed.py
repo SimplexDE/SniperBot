@@ -1,6 +1,5 @@
 import discord
 import datetime
-from dataclasses import dataclass
 from typing import Union
 
 class Embed:
@@ -65,11 +64,4 @@ class Embed:
             raise Exception("No Description set")
     
         return discord.Embed(title="", description=self.description, color=self.color)
-    
-@dataclass
-class Emote:
-    INFO = "<:info:1226139199351296051>"
-    RIGHT_ARROW = "<:helioschevronright:1267515447406887014>"
-    MEDAL = "<:heliosmedal:1267515459012657245>"
-    STAR = ":star:"
-    
+

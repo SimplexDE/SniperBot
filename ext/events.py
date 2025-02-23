@@ -11,12 +11,11 @@ from util.antispam import Antispam
 from util.starboard import Starboard
 from database.mongoclient import SpongiperClient
 import datetime
+
 from ext.developer import blocklist
+from util.constants import COLORS, FONTS_SRC, IMAGES_SRC, ATTACHMENTS_SRC
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
-FONTS_SRC = "./fonts"
-IMAGES_SRC = "./images"
-ATTACHMENTS_SRC = "./attachments"
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -62,18 +61,6 @@ class Events(commands.Cog):
         if await Antispam().spamming(message):
             return
         
-        colors = [
-            discord.Color.blue(),
-            discord.Color.red(),
-            discord.Color.blurple(),
-            discord.Color.gold(),
-            discord.Color.green(),
-            discord.Color.fuchsia(),
-            discord.Color.yellow(),
-            discord.Color.magenta(),
-            discord.Color.random(),
-        ]
-        
         reuse = False
         
         if not self.last_sent.get(message.guild.id):
@@ -98,7 +85,7 @@ class Events(commands.Cog):
         desc = f"> {self.last_message[message.guild.id][message.channel.id].content}" if len(self.last_message[message.guild.id][message.channel.id].content) != 0 else ""
         footer = f"🔗 #{self.last_message[message.guild.id][message.channel.id].channel.name} — 🕒 {timestamp}"
         
-        embed = discord.Embed(title="", description=desc, color=random.choice(colors), timestamp=datetime.datetime.now())
+        embed = discord.Embed(title="", description=desc, color=random.choice(COLORS), timestamp=datetime.datetime.now())
         embed.set_author(name=author, icon_url=self.last_message[message.guild.id][message.channel.id].author.avatar if self.last_message[message.guild.id][message.channel.id].author.avatar is not None else self.last_message[message.guild.id][message.channel.id].author.default_avatar)
         embed.set_footer(text=footer)
         

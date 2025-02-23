@@ -3,7 +3,8 @@ from discord.ext import commands
 from discord import app_commands
 from datetime import datetime
 
-from util.presets import Embed, Emote
+from util.embed import Embed
+from util.constants import Emote
 from database.mongoclient import SpongiperClient
 
 # TODO: refactor embeds with Embed class from util.presets

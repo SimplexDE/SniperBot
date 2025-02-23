@@ -38,7 +38,7 @@ class Antispam:
         
         self.antispam_guilds[guild_id]["last_message"] = datetime.now()
         antispam_guild["messages"] += 1
-        
+    
     async def spamming(self, message: discord.Message) -> bool:
         self._add_point(message.guild.id)
         return self.BLOCK_COMMANDS

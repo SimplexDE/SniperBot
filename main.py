@@ -7,6 +7,11 @@ import random
 from dotenv import get_key
 from discord.ext import commands, tasks
 
+from util.embed import Embed
+from util.constants import ONLINE_PRESENCES, STARTUP_PRESENCES
+
+# TODO: Implement Loguru Library for logging
+
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -18,11 +23,24 @@ paths = [
 class Sniper(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix=">>",
+            command_prefix="s.",
             help_command=None,
             intents=intents
         )
         self.message_cache = {}
+    
+    @staticmethod
+    def _get_extenstions() -> list:
+        extensions = []
+        
+        for path in paths:
+            for file in os.listdir(path):
+                if file.startswith("-"):
+                    continue
+                if file.endswith(".py"):
+                    extensions.append(f"{path.replace("/", ".")}{file[:-3]}")
+                    
+        return extensions
 
     @tasks.loop(minutes=30)
     async def cleanup(self):
@@ -50,53 +68,25 @@ class Sniper(commands.Bot):
 
     @tasks.loop(minutes=15)
     async def presence_tick(self):
-        choices: discord.Activity or discord.CustomActivity = [
-            discord.CustomActivity(name="Type s to snipe deleted messages"),
-            discord.CustomActivity(name="Stalking for deleted messages"),
-            discord.CustomActivity(name="Reviewing quotes"),
-            discord.CustomActivity(name="Quoting people"),
-            discord.CustomActivity(name="Danke Simplex"),
-            discord.Activity(type=discord.ActivityType.playing, name="Aale und Rolltreppen"),
-            discord.Activity(type=discord.ActivityType.watching, name="Don"),
-            discord.Activity(type=discord.ActivityType.watching, name="Juox"),
-            discord.Activity(type=discord.ActivityType.watching, name="Simplex"),
-            discord.Activity(type=discord.ActivityType.watching, name="ZS"),
-            discord.Streaming(name="Technikstube", url="https://www.youtube.com/watch?v=d1YBv2mWll0"),
-            discord.Streaming(name="Der Keller", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
-        ]
-
         await self.change_presence(
-            activity=random.choice(choices), status=discord.Status.online
+            activity=random.choice(ONLINE_PRESENCES), status=discord.Status.online
         )
 
     async def setup_hook(self):
         self.cleanup.start()
     
     async def on_connect(self):
-        choices: discord.Activity or discord.CustomActivity = [
-            discord.CustomActivity(name="¯\\_(ツ)_/¯"),
-            discord.CustomActivity(name="q(≧▽≦q)"),
-            discord.CustomActivity(name="(^///^)"),
-            discord.CustomActivity(name="\\^o^/"),
-            discord.CustomActivity(name="(ಥ _ ಥ)"),
-            discord.CustomActivity(name="◑﹏◐"),
-            discord.CustomActivity(name="The purpose of our lives is to be happy. — Dalai Lama"),
-            discord.CustomActivity(name="The healthiest response to life is joy. — Deepak Chopra")
-        ]
-
         await self.change_presence(
-            activity=random.choice(choices), status=discord.Status.dnd
+            activity=random.choice(STARTUP_PRESENCES), status=discord.Status.dnd
         )
 
     async def on_ready(self):
         
-        for path in paths:
-            for file in os.listdir(path):
-                if file.startswith("-"):
-                    continue
-                if file.endswith(".py"):
-                    await self.load_extension(f"{path.replace("/", ".")}{file[:-3]}")
+        for extension in self._get_extenstions():
+            await self.load_extension(extension)
         
+        
+        # TODO: Make this its own function / separate out into a file ----------------------------------------
         log_channel = self.get_channel(int(1325196683776229410))
         _guilds = self.guilds
         text_channels_count = 0
@@ -121,10 +111,17 @@ class Sniper(commands.Bot):
                     msgs += len(self.message_cache[channel.id])
                     text_channels_retrieved += 1
             guilds_retrieved += 1
+        # --------------------------------------------------------------------------------------------------------------------------
+            
+        embed = Embed(
+            title="History-Grabber",
+            description= \
+                f"Guilds retrieved: `{guilds_retrieved}/{guilds_count} -|- {guilds_retrieved / guilds_count * 100}%`" +
+                f"\nChannels retrieved: `{text_channels_retrieved}/{text_channels_count} -|- {text_channels_retrieved / text_channels_count * 100}%`" + 
+                f"\nMessages collected: **`{msgs}`**"
+        )
                 
-        await log_channel.send(f"CHANNELS: {text_channels_retrieved}/{text_channels_count} ({text_channels_retrieved / text_channels_count * 100}%)" \
-                                f"\nGUILDS: {guilds_retrieved}/{guilds_count} ({guilds_retrieved / guilds_count * 100}%)" \
-                                f"\nMESSAGES RETRIEVED: {msgs}")
+        await log_channel.send(embed=embed.StandardEmbed())
     
         sync = await self.tree.sync()
         print(f"> Synced {len(sync)} commands")

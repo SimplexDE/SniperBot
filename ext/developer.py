@@ -35,7 +35,6 @@ class Developer(commands.Cog):
         blocklist.pop(blocklist.index(member.id))
         
         await interaction.response.send_message(f"{member.name} ist nun entblockt.", allowed_mentions=None, ephemeral=True)
-
     
     # @app_commands.command(name="execute", description="Dev-Terminal")
     # async def execute(self, interaction: discord.Interaction, input: str):
