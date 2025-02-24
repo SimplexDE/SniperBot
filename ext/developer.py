@@ -4,8 +4,6 @@ from discord.ext import commands
 
 from util.constants import Emote
 
-# TODO: refactor all old execute commands to the new execute group
-
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
 ATTACHMENTS_SRC = "./attachments"
 
