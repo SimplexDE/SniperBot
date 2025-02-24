@@ -1,19 +1,16 @@
 import discord
 import random
-import re
 import os
 import pytz
-import textwrap
-from PIL import Image, ImageDraw, ImageFont
-from unidecode import unidecode
 from discord.ext import commands
 from util.antispam import Antispam
 from util.starboard import Starboard
 from database.mongoclient import SpongiperClient
-import datetime
 
+from util.quote import Quote
+from util.embed import Embed
 from ext.developer import blocklist
-from util.constants import COLORS, FONTS_SRC, IMAGES_SRC, ATTACHMENTS_SRC
+from util.constants import COLORS, ATTACHMENTS_SRC
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
 
@@ -82,14 +79,14 @@ class Events(commands.Cog):
         tz = pytz.timezone("Europe/Berlin")
         timestamp = self.last_message[message.guild.id][message.channel.id].created_at.astimezone(tz).strftime("%d.%m.%Y %H:%M")
         author = f"📸 {self.last_message[message.guild.id][message.channel.id].author.global_name}"
+        author_url = self.last_message[message.guild.id][message.channel.id].author.avatar if self.last_message[message.guild.id][message.channel.id].author.avatar is not None else self.last_message[message.guild.id][message.channel.id].author.default_avatar
         desc = f"> {self.last_message[message.guild.id][message.channel.id].content}" if len(self.last_message[message.guild.id][message.channel.id].content) != 0 else ""
         footer = f"🔗 #{self.last_message[message.guild.id][message.channel.id].channel.name} — 🕒 {timestamp}"
+        color = random.choice(COLORS)
         
-        embed = discord.Embed(title="", description=desc, color=random.choice(COLORS), timestamp=datetime.datetime.now())
-        embed.set_author(name=author, icon_url=self.last_message[message.guild.id][message.channel.id].author.avatar if self.last_message[message.guild.id][message.channel.id].author.avatar is not None else self.last_message[message.guild.id][message.channel.id].author.default_avatar)
-        embed.set_footer(text=footer)
+        embed = Embed(title=author, description=desc, color=color, title_icon_url=author_url, footer=footer)
         
-        embeds = [embed]
+        embeds = [embed.StandardEmbed()]
         files = []
         i = 0
         
@@ -97,16 +94,13 @@ class Events(commands.Cog):
             for f in os.listdir(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}"):
                 if i == 0:
                     embeds.pop(0)
-                    embed.set_image(url=f"attachment://{f}")
-                    embeds.append(embed)
+                    embed.image_url = f"attachment://{f}"
+                    embeds.append(embed.BigEmbed())
                 
-                embed_n = discord.Embed(title="", description="", color=discord.Color.blue(), timestamp=datetime.datetime.now())
-                embed_n.set_image(url=f"attachment://{f}")
-                embed_n.set_author(name=author, icon_url=self.last_message[message.guild.id][message.channel.id].author.avatar if self.last_message[message.guild.id][message.channel.id].author.avatar is not None else self.last_message[message.guild.id][message.channel.id].author.default_avatar)
-                embed_n.set_footer(text=footer)
+                embed_n = Embed(title=author, color=color, title_icon_url=author_url, footer=footer, image_url=f"attachment://{f}")
                 
                 if i != 0:
-                    embeds.append(embed_n)
+                    embeds.append(embed_n.BigEmbed())
                 files.append(discord.File(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}/{f}"))
                 i += 1
                 
@@ -115,16 +109,13 @@ class Events(commands.Cog):
             for url in embed_urls:
                 if i == 0:
                     embeds.pop(0)
-                    embed.set_image(url=url)
-                    embeds.append(embed)
+                    embed.image_url = url
+                    embeds.append(embed.BigEmbed())
                 
-                embed_n = discord.Embed(title="", description="", color=discord.Color.blue(), timestamp=datetime.datetime.now())
-                embed_n.set_image(url=url)
-                embed_n.set_author(name=author, icon_url=self.last_message[message.guild.id][message.channel.id].author.avatar if self.last_message[message.guild.id][message.channel.id].author.avatar is not None else self.last_message[message.guild.id][message.channel.id].author.default_avatar)
-                embed_n.set_footer(text=footer)
+                embed_n = Embed(title=author, color=color, title_icon_url=author_url, footer=footer, image_url=url)
                 
                 if i != 0:
-                    embeds.append(embed_n)
+                    embeds.append(embed_n.BigEmbed())
                 i += 1
                 
         self.last_sent_from_bot[message.guild.id][message.channel.id] = await message.channel.send(embeds=embeds, files=files if reuse is False else None)
@@ -229,29 +220,6 @@ class Events(commands.Cog):
 
         self.last_message[message.guild.id][message.channel.id] = message
     
-    def truncate_text(self, text, max_chars=100, suffix="..."):
-        return text[:max_chars] + suffix if len(text) > max_chars else text
-    
-    def replace_mentions(self, text: str, guild: discord.Guild):        
-        pattern = "<(@|#|@&?)(\\d+)>"
-        mentions = re.findall(pattern, text)
-        
-        for mention in mentions:
-            match (mention[0]):
-                case ("@&"):
-                    text = text.replace(f"<{mention[0] + str(mention[1])}>", f"@{guild.get_role(int(mention[1])).name}")      
-                case ("@"):
-                    text = text.replace(f"<{mention[0] + str(mention[1])}>", f"@{guild.get_member(int(mention[1])).name}")
-                case ("#"):
-                    text = text.replace(f"<{mention[0] + str(mention[1])}>", f"#{guild.get_channel(int(mention[1])).name}") 
-                case (_):
-                    continue
-
-        return text
-    
-    def normalize_text(self, text: str):
-        return unidecode(text)
-    
     @commands.Cog.listener(name="on_message")
     async def make_that_a_quote(self, message: discord.Message):
         mentions = message.mentions
@@ -276,61 +244,7 @@ class Events(commands.Cog):
                 return
             
             origin = await message.reply("Wird generiert...")
-            
-            if not os.path.exists(f"{IMAGES_SRC}/out"):
-                os.mkdir(f"{IMAGES_SRC}/out")
-            
-            avatar_path = "images/out/avatar.png"
-            
-            avatar = msg.author.display_avatar if msg.author.display_avatar is not None else msg.author.default_avatar
-            await avatar.save(avatar_path)
-            
-            AVATAR_SIZE = (256, 256)
-            BACKGROUND_SIZE = (256*2, 256)
-            
-            FONT_LARGE = ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=24)
-            FONT_SMALL = ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=18)
-            FONT_XSMALL = ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=12)
-            
-            mask = Image.open(f"{IMAGES_SRC}/mask.png")
-            background = Image.new("RGBA", BACKGROUND_SIZE, color=(0,0,0))
-            avatar_image = Image.open(avatar_path).resize(AVATAR_SIZE)
-            background.paste(avatar_image, mask=mask.convert("L").resize(AVATAR_SIZE))
-            
-            draw = ImageDraw.Draw(background)
-            
-            message_text = self.replace_mentions(msg.content, message.guild)
-            message_text = self.normalize_text(message_text)
-            final_message = "\n".join(textwrap.wrap(message_text, 25))
-            final_message = self.truncate_text(final_message)
-            
-            textbox_LARGE = draw.textbbox((0, 0), text=f"„{final_message}“", font=FONT_LARGE)
-            textbox_SMALL = draw.textbbox((0, 0), text=self.normalize_text(msg.author.display_name), font=FONT_SMALL)
-            textbox_XSMALL = draw.textbbox((0, 0), text=msg.author.name, font=FONT_XSMALL)
-
-            textbox_middle_L = (textbox_LARGE[2] / 2, textbox_LARGE[3] / 2)
-            textbox_middle_S = (textbox_SMALL[2] / 2, textbox_SMALL[3] / 2)
-            textbox_middle_XS = (textbox_XSMALL[2] / 2, textbox_XSMALL[3] / 2)
-            
-            draw.text((512 / 2 - textbox_middle_L[0] + 90, 256 / 2 - textbox_middle_L[1]), font=FONT_LARGE, text=f"„{final_message}“", fill="white", align="center")
-            draw.text((512 / 2 - textbox_middle_S[0] + 90, 256 / 2 - textbox_middle_S[1] + 90), font=FONT_SMALL, text=self.normalize_text(msg.author.display_name), fill="white", align="center")
-            draw.text((512 / 2 - textbox_middle_XS[0] + 90, 256 / 2 - textbox_middle_S[1] + 115), font=FONT_XSMALL, text=msg.author.name, fill="gray", align="center")
-            
-            background.save(f"{IMAGES_SRC}/out/out.png")
-            
-            colors = [
-                discord.Color.blue(),
-                discord.Color.red(),
-                discord.Color.blurple(),
-                discord.Color.gold(),
-                discord.Color.green(),
-                discord.Color.fuchsia(),
-                discord.Color.yellow(),
-                discord.Color.magenta(),
-                discord.Color.random(),
-            ]
-            
-            attachment = discord.File(f"{IMAGES_SRC}/out/out.png")
+            attachment = await Quote(message=msg).create()
             
             tz = pytz.timezone("Europe/Berlin")
             timestamp = msg.created_at.astimezone(tz).strftime("%d.%m.%Y %H:%M")
@@ -338,10 +252,13 @@ class Events(commands.Cog):
             desc = f"> {msg.content}" if len(msg.content) != 0 else ""
             footer = f"🔗 #{msg.channel.name} — 🕒 {timestamp}"
             
-            embed = discord.Embed(title="", description=desc, color=random.choice(colors), timestamp=datetime.datetime.now())
-            embed.set_author(name=author, icon_url=msg.author.avatar if msg.author.avatar is not None else msg.author.default_avatar, url=msg.jump_url)
-            embed.set_footer(text=footer)
-            embed.set_image(url="attachment://out.png")
+            embed = Embed(title=author, 
+                        title_icon_url=msg.author.avatar if msg.author.avatar is not None else msg.author.default_avatar,
+                        title_url=msg.jump_url,
+                        description=desc, 
+                        footer=footer,
+                        image_url="attachment://out.png",
+                        color=random.choice(COLORS))
             
             db_guild = await self.client.get_guild(message.guild.id)
             settings = db_guild.settings
@@ -352,7 +269,7 @@ class Events(commands.Cog):
                 channel = self.bot.get_channel(settings["quote_channel"])
             
             await origin.delete(delay=1)
-            quote = await channel.send(embed=embed, allowed_mentions=None, file=attachment)
+            quote = await channel.send(embed=embed.BigEmbed(), allowed_mentions=None, file=attachment)
             await message.reply(f"Zitat erstellt: {quote.jump_url}", silent=True, delete_after=5)
             
     @commands.Cog.listener(name="on_raw_reaction_add")

@@ -6,6 +6,8 @@ class Emote:
     RIGHT_ARROW = "<:helioschevronright:1267515447406887014>"
     MEDAL = "<:heliosmedal:1267515459012657245>"
     STAR = ":star:"
+    WARNING = ":warning:"
+    EDIT = "<:edit:1210725875625099304>"
 
 FONTS_SRC = "./fonts"
 IMAGES_SRC = "./images"

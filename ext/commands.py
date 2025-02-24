@@ -1,14 +1,11 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from datetime import datetime
 
 from util.embed import Embed
 from util.constants import Emote
 from database.mongoclient import SpongiperClient
 
-# TODO: refactor embeds with Embed class from util.presets
-# TODO: refactor emotes with Emote class from util.presets
 # TODO: redesign embed design
 
 class Commands(commands.Cog):
@@ -56,7 +53,6 @@ class Commands(commands.Cog):
             footer="Licensed under MIT",
             footer_icon_url=self.bot.user.avatar.url,
             color=discord.Color.blue(),
-            timestamp=datetime.now(),
             fields=fields,
         )
         
@@ -70,31 +66,24 @@ class Commands(commands.Cog):
     
         settings["starboard_channel"] = None
         
-        if "stars" not in settings:
+        if "stars" not in settings: 
             settings["stars"] = 3
-        
         stars = settings["stars"]
         
-        embed = discord.Embed(
+        fields = [
+            (f"{Emote.RIGHT_ARROW} Starboard-Channel", f"> - `N/A` {Emote.EDIT}", False),
+            (f"{Emote.STAR} Stars needed per Message", f"> - {stars} {Emote.STAR}", False),
+            ]
+        
+        embed = Embed(
             title="Starboard",
-            description="",
             color=discord.Color.blue(),
-            timestamp=datetime.now()
-        )
-        embed.add_field(
-            name=f"{Emote.RIGHT_ARROW} Starboard-Channel",
-            value="> - `N/A` <:edit:1210725875625099304>",
-            inline=False
-        )
-        embed.add_field(
-            name=f"{Emote.STAR} Stars needed per Message",
-            value=f"> - {stars} {Emote.STAR}",
-            inline=False
+            fields=fields
         )
         
         db_guild.settings = settings
         
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed.StandardEmbed())
     
     @starboard.command(name="set", description="Set the Starboard channel (& activate)")
     @app_commands.default_permissions(manage_channels=True)
@@ -108,80 +97,23 @@ class Commands(commands.Cog):
         
         stars = settings["stars"]
         
-        embed = discord.Embed(
+        fields = [
+            (f"{Emote.RIGHT_ARROW} Starboard-Channel", f"> - {channel.mention} {Emote.EDIT}", False),
+            (f"{Emote.STAR} Stars needed per Message", f"> - {stars} {Emote.STAR}", False),
+            ]
+        
+        embed = Embed(
             title="Starboard",
-            description="",
             color=discord.Color.blue(),
-            timestamp=datetime.now()
-        )
-        embed.add_field(
-            name=f"{Emote.RIGHT_ARROW} Starboard-Channel",
-            value=f"> - {channel.mention} <:edit:1210725875625099304>",
-            inline=False
-        )
-        embed.add_field(
-            name=f"{Emote.STAR} Stars needed per Message",
-            value=f"> - {stars} {Emote.STAR}",
-            inline=False
+            fields=fields
         )
         
         settings["starboard_channel"] = channel.id
         
         db_guild.settings = settings
         
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed.StandardEmbed())
         
-    @quote.command(name="set", description="Disable the Quoting")
-    @app_commands.default_permissions(manage_channels=True)
-    async def quote_set(self, interaction: discord.Interaction, channel: discord.TextChannel):
-        
-        db_guild = await self.client.get_guild(interaction.guild.id)
-        settings = db_guild.settings
-        
-        embed = discord.Embed(
-            title="Quote",
-            description="",
-            color=discord.Color.blue(),
-            timestamp=datetime.now()
-        )
-        embed.add_field(
-            name="<:helioschevronright:1267515447406887014> Quote-Channel",
-            value=f"> - {channel.mention} <:edit:1210725875625099304>",
-            inline=False
-        )
-        
-        settings["quote_channel"] = channel.id
-        
-        db_guild.settings = settings
-        
-        await interaction.response.send_message(embed=embed)
-        
-    @quote.command(name="unset", description="Set the Quote channel (& activate)")
-    @app_commands.default_permissions(manage_channels=True)
-    async def quote_unset(self, interaction: discord.Interaction):
-        
-        db_guild = await self.client.get_guild(interaction.guild.id)
-        settings = db_guild.settings
-        
-        embed = discord.Embed(
-            title="Quote",
-            description="",
-            color=discord.Color.blue(),
-            timestamp=datetime.now()
-        )
-        embed.add_field(
-            name="<:helioschevronright:1267515447406887014> Quote-Channel",
-            value="> - `N/A` <:edit:1210725875625099304>",
-            inline=False
-        )
-        
-        settings["quote_channel"] = None
-        
-        db_guild.settings = settings
-        
-        await interaction.response.send_message(embed=embed)
-
-
     @starboard.command(name="stars", description="Set the needed stars")
     @app_commands.default_permissions(manage_channels=True)
     async def stars(self, interaction: discord.Interaction, stars: int):
@@ -197,28 +129,68 @@ class Commands(commands.Cog):
         if settings["starboard_channel"] is not None:
             starboard_channel = self.bot.get_channel(settings["starboard_channel"])
         
-        embed = discord.Embed(
+        fields = [
+            (f"{Emote.RIGHT_ARROW} Starboard-Channel", f"> - {starboard_channel.mention if starboard_channel is not None else "`N/A` (set with `/starboard set`)"}", False),
+            (f"{Emote.STAR} Stars needed per Message", f"> - {stars} {Emote.STAR} {Emote.EDIT}", False),
+            ]
+        
+        embed = Embed(
             title="Starboard",
-            description="",
             color=discord.Color.blue(),
-            timestamp=datetime.now()
-        )
-        embed.add_field(
-            name="<:helioschevronright:1267515447406887014> Starboard-Channel",
-            value=f"> - {starboard_channel.mention if starboard_channel is not None else "Not Set (set with `/starboard`)"}",
-            inline=False
-        )
-        embed.add_field(
-            name="<:heliosmedal:1267515459012657245> Stars needed to be starred",
-            value=f"> - {stars} :star: <:edit:1210725875625099304>",
-            inline=False
+            fields=fields
         )
         
         settings["stars"] = stars
         
         db_guild.settings = settings
         
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed.StandardEmbed())
+        
+    @quote.command(name="set", description="Enable the Quoting")
+    @app_commands.default_permissions(manage_channels=True)
+    async def quote_set(self, interaction: discord.Interaction, channel: discord.TextChannel):
+        
+        db_guild = await self.client.get_guild(interaction.guild.id)
+        settings = db_guild.settings
+        
+        fields = [
+            (f"{Emote.ARROW_RIGHT} Quote-Channel", f"> {channel.mention} {Emote.EDIT}", False),
+            ]
+        
+        embed = Embed(
+            title="Quote",
+            color=discord.Color.blue(),
+            fields=fields
+        )
+        
+        settings["quote_channel"] = channel.id
+        
+        db_guild.settings = settings
+        
+        await interaction.response.send_message(embed=embed.StandardEmbed())
+        
+    @quote.command(name="unset", description="Disable the Quoting")
+    @app_commands.default_permissions(manage_channels=True)
+    async def quote_unset(self, interaction: discord.Interaction):
+        
+        db_guild = await self.client.get_guild(interaction.guild.id)
+        settings = db_guild.settings
+        
+        fields = [
+            (f"{Emote.ARROW_RIGHT} Quote-Channel", f"> `N/A` {Emote.EDIT}", False),
+            ]
+        
+        embed = Embed(
+            title="Quote",
+            color=discord.Color.blue(),
+            fields=fields
+        )
+        
+        settings["quote_channel"] = None
+        
+        db_guild.settings = settings
+        
+        await interaction.response.send_message(embed=embed.StandardEmbed())
     
 async def setup(bot):
     await bot.add_cog(Commands(bot))
