@@ -2,9 +2,10 @@ import discord
 import random
 
 from discord.ext import commands
-from datetime import datetime
 from pytz import timezone
 
+from util.constants import COLORS
+from util.embed import Embed
 from database.mongoclient import SpongiperClient
 
 class Starboard:
@@ -14,36 +15,24 @@ class Starboard:
         self.client: SpongiperClient() = SpongiperClient(bot)
     
     def _get_random_color(self) -> discord.Colour:
-        _colors = [
-                discord.Color.blue(),
-                discord.Color.red(),
-                discord.Color.blurple(),
-                discord.Color.gold(),
-                discord.Color.green(),
-                discord.Color.fuchsia(),
-                discord.Color.yellow(),
-                discord.Color.magenta(),
-            ]
-        return random.choice(_colors)
+        return random.choice(COLORS)
     
     def _get_embed(self, message: discord.Message, reaction_count: int) -> discord.Embed: 
-        embed = discord.Embed(
-            title="",
-            description=message.content,
-            timestamp=datetime.now(),
-            color=self._get_random_color(),
-            )
-        embed.set_author(name=f"{message.author.display_name} ({message.author.name}) — {reaction_count} ⭐",
-                        icon_url=message.author.avatar if message.author.avatar is not None else message.author.default_avatar,
-                        url=message.jump_url)
-
         timestamp = message.created_at.astimezone(self.tz).strftime("%d.%m.%Y %H:%M")
-        embed.set_footer(text=f"🔗 #{message.channel} — 🕒 {timestamp}")
+        
+        embed = Embed(title=f"{message.author.display_name} ({message.author.name}) — {reaction_count} ⭐",
+                    title_icon_url=message.author.avatar if message.author.avatar is not None else message.author.default_avatar,
+                    title_url=message.jump_url,
+                    description=message.content,
+                    color=self._get_random_color(),
+                    footer=f"🔗 #{message.channel} — 🕒 {timestamp}")
         
         if message.attachments:
-            embed.set_image(url=message.attachments[0].url)
+            embed.image_url = message.attachments[0].url
         
-        return embed
+        if message.attachments:
+            return embed.BigEmbed()
+        return embed.StandardEmbed()
     
     def _get_emoji_count(self, emoji: str, reactions: list[discord.Reaction]) -> int:
         for reaction in reactions:
