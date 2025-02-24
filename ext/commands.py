@@ -16,10 +16,16 @@ class Commands(commands.Cog):
         self.bot: commands.Bot = bot
         self.client: SpongiperClient = SpongiperClient(bot)
     
-    starboard = app_commands.Group(name="starboard", description="Manage the guilds Starboard Settings")
+    starboard = app_commands.Group(name="starboard", description="Manage the guilds Starboard Settings", 
+                                allowed_contexts=(app_commands.AppCommandContext(guild=True, dm_channel=False, private_channel=True)),
+                                allowed_installs=app_commands.AppInstallationType(guild=True, user=False))
     
-    quote = app_commands.Group(name="quote", description="Manage the guilds Quote Settings")
+    quote = app_commands.Group(name="quote", description="Manage the guilds Quote Settings", 
+                                allowed_contexts=(app_commands.AppCommandContext(guild=True, dm_channel=False, private_channel=True)),
+                                allowed_installs=app_commands.AppInstallationType(guild=True, user=False))
     
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+    @app_commands.allowed_installs(guilds=True, users=True)
     @app_commands.command(name="about", description="About me")
     async def about(self, interaction: discord.Interaction):
         DEV = self.bot.get_user(579111799794958377)
