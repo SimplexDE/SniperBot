@@ -6,8 +6,6 @@ from util.embed import Embed
 from util.constants import Emote
 from database.mongoclient import SpongiperClient
 
-# TODO: redesign embed design
-
 class Commands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
@@ -37,7 +35,7 @@ class Commands(commands.Cog):
                 False
             ),
             (
-                f"{Emote.INFO} <:info:1226139199351296051> Links",
+                f"{Emote.INFO} Links",
                 "> - [GitHub](https://github.com/SimplexDE/SniperBot)" + 
                 "\n> - [Invite me](https://discord.com/oauth2/authorize?client_id=862859543700176896&permissions=274878024704&integration_type=0&scope=bot+applications.commands)",
                 False
@@ -71,12 +69,12 @@ class Commands(commands.Cog):
         stars = settings["stars"]
         
         fields = [
-            (f"{Emote.RIGHT_ARROW} Starboard-Channel", f"> - `N/A` {Emote.EDIT}", False),
-            (f"{Emote.STAR} Stars needed per Message", f"> - {stars} {Emote.STAR}", False),
+            (f"{Emote.RIGHT_ARROW} Channel", f"> `N/A` {Emote.EDIT}", False),
+            (f"{Emote.STAR} Minimum Stars", f"> {stars} {Emote.STAR}", False),
             ]
         
         embed = Embed(
-            title="Starboard",
+            title="Settings | Starboard",
             color=discord.Color.blue(),
             fields=fields
         )
@@ -98,12 +96,12 @@ class Commands(commands.Cog):
         stars = settings["stars"]
         
         fields = [
-            (f"{Emote.RIGHT_ARROW} Starboard-Channel", f"> - {channel.mention} {Emote.EDIT}", False),
-            (f"{Emote.STAR} Stars needed per Message", f"> - {stars} {Emote.STAR}", False),
+            (f"{Emote.RIGHT_ARROW} Channel", f"> {channel.mention} {Emote.EDIT}", False),
+            (f"{Emote.STAR} Minimum Stars", f"> {stars} {Emote.STAR}", False),
             ]
         
         embed = Embed(
-            title="Starboard",
+            title="Settings | Starboard",
             color=discord.Color.blue(),
             fields=fields
         )
@@ -130,12 +128,12 @@ class Commands(commands.Cog):
             starboard_channel = self.bot.get_channel(settings["starboard_channel"])
         
         fields = [
-            (f"{Emote.RIGHT_ARROW} Starboard-Channel", f"> - {starboard_channel.mention if starboard_channel is not None else "`N/A` (set with `/starboard set`)"}", False),
-            (f"{Emote.STAR} Stars needed per Message", f"> - {stars} {Emote.STAR} {Emote.EDIT}", False),
+            (f"{Emote.RIGHT_ARROW} Channel", f"> {starboard_channel.mention if starboard_channel is not None else "`N/A` (set with `/starboard set`)"}", False),
+            (f"{Emote.STAR} Minimum Stars", f"> {stars} {Emote.STAR} {Emote.EDIT}", False),
             ]
         
         embed = Embed(
-            title="Starboard",
+            title="Settings | Starboard",
             color=discord.Color.blue(),
             fields=fields
         )
@@ -154,11 +152,11 @@ class Commands(commands.Cog):
         settings = db_guild.settings
         
         fields = [
-            (f"{Emote.ARROW_RIGHT} Quote-Channel", f"> {channel.mention} {Emote.EDIT}", False),
+            (f"{Emote.ARROW_RIGHT} Channel", f"> {channel.mention} {Emote.EDIT}", False),
             ]
         
         embed = Embed(
-            title="Quote",
+            title="Settings | Quote",
             color=discord.Color.blue(),
             fields=fields
         )
@@ -177,11 +175,11 @@ class Commands(commands.Cog):
         settings = db_guild.settings
         
         fields = [
-            (f"{Emote.ARROW_RIGHT} Quote-Channel", f"> `N/A` {Emote.EDIT}", False),
+            (f"{Emote.ARROW_RIGHT} Channel", f"> `N/A` {Emote.EDIT}", False),
             ]
         
         embed = Embed(
-            title="Quote",
+            title="Settings | Quote",
             color=discord.Color.blue(),
             fields=fields
         )
@@ -191,7 +189,163 @@ class Commands(commands.Cog):
         db_guild.settings = settings
         
         await interaction.response.send_message(embed=embed.StandardEmbed())
-    
+
+    @about.error
+    async def about_error(self, interaction: discord.Interaction, error: Exception):
+        if isinstance(error, app_commands.errors.CheckFailure):
+            await interaction.response.send_message("You are not allowed to use this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message("Something went wrong, check your arguments.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message("You are currently on cooldown.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.AppCommandError):
+            await interaction.response.send_message("Something went wrong, try again.", ephemeral=True)
+            raise error
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        else:
+            await interaction.response.send_message("Unknown error, please contact the developer about this.", ephemeral=True)
+            raise error
+            return
+        
+    @starboard_set.error
+    async def starboard_set_error(self, interaction: discord.Interaction, error: Exception):
+        if isinstance(error, app_commands.errors.CheckFailure):
+            await interaction.response.send_message("You are not allowed to use this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message("Something went wrong, check your arguments.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message("You are currently on cooldown.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.AppCommandError):
+            await interaction.response.send_message("Something went wrong, try again.", ephemeral=True)
+            raise error
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        else:
+            await interaction.response.send_message("Unknown error, please contact the developer about this.", ephemeral=True)
+            raise error
+            return
+
+    @starboard_unset.error
+    async def starboard_unset_error(self, interaction: discord.Interaction, error: Exception):
+        if isinstance(error, app_commands.errors.CheckFailure):
+            await interaction.response.send_message("You are not allowed to use this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message("Something went wrong, check your arguments.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message("You are currently on cooldown.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.AppCommandError):
+            await interaction.response.send_message("Something went wrong, try again.", ephemeral=True)
+            raise error
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        else:
+            await interaction.response.send_message("Unknown error, please contact the developer about this.", ephemeral=True)
+            raise error
+            return
+        
+    @stars.error
+    async def stars_error(self, interaction: discord.Interaction, error: Exception):
+        if isinstance(error, app_commands.errors.CheckFailure):
+            await interaction.response.send_message("You are not allowed to use this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message("Something went wrong, check your arguments.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message("You are currently on cooldown.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.AppCommandError):
+            await interaction.response.send_message("Something went wrong, try again.", ephemeral=True)
+            raise error
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        else:
+            await interaction.response.send_message("Unknown error, please contact the developer about this.", ephemeral=True)
+            raise error
+            return
+
+    @quote_set.error
+    async def quote_set_error(self, interaction: discord.Interaction, error: Exception):
+        if isinstance(error, app_commands.errors.CheckFailure):
+            await interaction.response.send_message("You are not allowed to use this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message("Something went wrong, check your arguments.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message("You are currently on cooldown.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.AppCommandError):
+            await interaction.response.send_message("Something went wrong, try again.", ephemeral=True)
+            raise error
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        else:
+            await interaction.response.send_message("Unknown error, please contact the developer about this.", ephemeral=True)
+            raise error
+            return
+        
+    @quote_unset.error
+    async def quote_unset_error(self, interaction: discord.Interaction, error: Exception):
+        if isinstance(error, app_commands.errors.CheckFailure):
+            await interaction.response.send_message("You are not allowed to use this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandInvokeError):
+            await interaction.response.send_message("Something went wrong, check your arguments.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.CommandOnCooldown):
+            await interaction.response.send_message("You are currently on cooldown.", ephemeral=True)
+            return
+        elif isinstance(error, app_commands.errors.AppCommandError):
+            await interaction.response.send_message("Something went wrong, try again.", ephemeral=True)
+            raise error
+            return
+        elif isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message("I am missing permissions to execute this command.", ephemeral=True)
+            return
+        else:
+            await interaction.response.send_message("Unknown error, please contact the developer about this.", ephemeral=True)
+            raise error
+            return
+        
 async def setup(bot):
     await bot.add_cog(Commands(bot))
     print(f"> {__name__} loaded")

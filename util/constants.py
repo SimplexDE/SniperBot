@@ -1,5 +1,9 @@
 import discord
 
+class VIP:
+    DEVELOPER = 579111799794958377
+    BOT = 862859543700176896
+
 class Emote:
     SPACER = "<:spacer:1226137637148950559>"
     INFO = "<:info:1226139199351296051>"
