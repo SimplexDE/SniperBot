@@ -10,11 +10,11 @@ class PrefixCommands(commands.Cog):
     
     @commands.command(name="don", aliases=["donovan", "songbird"])
     async def don_prefixcommand(self, context: commands.Context):
-        await context.reply("Don ist ein cooler dude.\n\nJoin **[[Der Keller]](<https://www.discord.gg/keller>)**")
+        await context.reply("Don ist ein cooler dude.")
         
     @commands.command(name="simplex", aliases=["simpi", "smplx"])
     async def simplex_prefixcommand(self, context: commands.Context):
-        await context.reply("Simplex ist ein cooler dude.\n\nJoin [**Technikstube**](<https://www.discord.gg/eR23G266BS>)")
+        await context.reply("Simplex ist ein cooler dude.")
     
 async def setup(bot):
     await bot.add_cog(PrefixCommands(bot))
