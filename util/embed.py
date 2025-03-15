@@ -36,8 +36,8 @@ class Embed:
         out.set_author(name=self.title, icon_url=self.title_icon_url, url=self.title_url)
         out.set_footer(text=self.footer, icon_url=self.footer_icon_url)
         
-        if len(self.image_url) == 0:
-            raise Exception("No Banner set")
+        if not self.image_url:
+            self.image_url = None
         out.set_image(url=self.image_url)
         
         if len(self.fields) != 0:
