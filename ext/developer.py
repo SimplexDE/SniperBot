@@ -3,7 +3,6 @@ from discord import app_commands
 from discord.ext import commands
 
 from util.checks import is_dev
-from util.constants import Emote
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
 ATTACHMENTS_SRC = "./attachments"
@@ -14,9 +13,9 @@ class Developer(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
     
-    execute = app_commands.Group(name="execute", description="Developer Commands", 
+    execute = app_commands.Group(name="sudo", description="Developer Commands", 
                                 allowed_contexts=(app_commands.AppCommandContext(guild=True, dm_channel=False, private_channel=True)),
-                                allowed_installs=app_commands.AppInstallationType(guild=True, user=True))
+                                allowed_installs=app_commands.AppInstallationType(guild=False, user=True))
     
     @is_dev()
     @execute.command(name="block", description="Block a User")

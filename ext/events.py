@@ -10,7 +10,7 @@ from database.mongoclient import SpongiperClient
 from util.quote import Quote
 from util.embed import Embed
 from ext.developer import blocklist
-from util.constants import COLORS, ATTACHMENTS_SRC
+from util.constants import COLORS, ATTACHMENTS_SRC, Emote
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
 
@@ -228,6 +228,18 @@ class Events(commands.Cog):
             if message.type != discord.MessageType.reply:
                 await message.reply("> :warning: Ohne Nachricht, kein Zitat :person_shrugging:", allowed_mentions=None, delete_after=5)
                 return
+            
+            if message.channel.is_nsfw():
+                db_guild = await self.client.get_guild(message.guild.id)
+                settings = db_guild.settings
+                
+                if "nsfw_allow" not in settings:
+                    settings["nsfw_allow"] = False
+                    db_guild.settings = settings
+                
+                if not settings["nsfw_allow"]:
+                    await message.reply(f"> {Emote.NSFW} NSFW Content ist nicht erlaubt. (`/nsfw`)", allowed_mentions=None, delete_after=5)
+                    return
             
             ref: discord.MessageReference = message.reference
             

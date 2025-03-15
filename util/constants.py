@@ -12,6 +12,9 @@ class Emote:
     STAR = ":star:"
     WARNING = ":warning:"
     EDIT = "<:edit:1210725875625099304>"
+    NSFW = ":underage:"
+    CHECK = ":white_check_mark:"
+    UNCHECK = ":x:"
 
 FONTS_SRC = "./fonts"
 IMAGES_SRC = "./images"

@@ -55,7 +55,35 @@ class Commands(commands.Cog):
         )
         
         await interaction.response.send_message(embed=embed.StandardEmbed())
-    
+
+    @app_commands.command(name="nsfw", description="Toggle if NSFW Content is allowed")
+    @app_commands.allowed_installs(guilds=True, users=False)
+    @app_commands.default_permissions(manage_channels=True)
+    async def nsfw_toggle(self, interaction: discord.Interaction):
+        
+        db_guild = await self.client.get_guild(interaction.guild.id)
+        settings = db_guild.settings
+        
+        if "nsfw_allow" not in settings:
+            settings["nsfw_allow"] = False
+        settings["nsfw_allow"] = False if settings["nsfw_allow"] else True
+
+        nsfw_allowed = Emote.CHECK if settings["nsfw_allow"] else Emote.UNCHECK
+        
+        fields = [
+            (f"{Emote.NSFW} NSFW", f"> {nsfw_allowed} {Emote.EDIT}", False)
+            ]
+        
+        embed = Embed(
+            title="Settings | NSFW",
+            color=discord.Color.blue(),
+            fields=fields
+        )
+        
+        db_guild.settings = settings
+        
+        await interaction.response.send_message(embed=embed.StandardEmbed())
+
     @starboard.command(name="unset", description="Disable the Starboard")
     @app_commands.default_permissions(manage_channels=True)
     async def starboard_unset(self, interaction: discord.Interaction):
@@ -68,9 +96,15 @@ class Commands(commands.Cog):
             settings["stars"] = 3
         stars = settings["stars"]
         
+        if "nsfw_allow" not in settings:
+            settings["nsfw_allow"] = False
+        
+        nsfw_allowed = Emote.CHECK if settings["nsfw_allow"] else Emote.UNCHECK
+        
         fields = [
             (f"{Emote.RIGHT_ARROW} Channel", f"> `N/A` {Emote.EDIT}", False),
             (f"{Emote.STAR} Minimum Stars", f"> {stars} {Emote.STAR}", False),
+            (f"{Emote.NSFW} NSFW", f"> {nsfw_allowed}" , False)
             ]
         
         embed = Embed(
@@ -95,9 +129,16 @@ class Commands(commands.Cog):
         
         stars = settings["stars"]
         
+        if "nsfw_allow" not in settings:
+            settings["nsfw_allow"] = False
+        
+        nsfw_allowed = Emote.CHECK if settings["nsfw_allow"] else Emote.UNCHECK
+        
+        
         fields = [
             (f"{Emote.RIGHT_ARROW} Channel", f"> {channel.mention} {Emote.EDIT}", False),
             (f"{Emote.STAR} Minimum Stars", f"> {stars} {Emote.STAR}", False),
+            (f"{Emote.NSFW} NSFW", f"> {nsfw_allowed}" , False)
             ]
         
         embed = Embed(
@@ -111,7 +152,7 @@ class Commands(commands.Cog):
         db_guild.settings = settings
         
         await interaction.response.send_message(embed=embed.StandardEmbed())
-        
+
     @starboard.command(name="stars", description="Set the needed stars")
     @app_commands.default_permissions(manage_channels=True)
     async def stars(self, interaction: discord.Interaction, stars: int):
@@ -127,9 +168,15 @@ class Commands(commands.Cog):
         if settings["starboard_channel"] is not None:
             starboard_channel = self.bot.get_channel(settings["starboard_channel"])
         
+        if "nsfw_allow" not in settings:
+            settings["nsfw_allow"] = False
+        
+        nsfw_allowed = Emote.CHECK if settings["nsfw_allow"] else Emote.UNCHECK
+        
         fields = [
             (f"{Emote.RIGHT_ARROW} Channel", f"> {starboard_channel.mention if starboard_channel is not None else "`N/A` (set with `/starboard set`)"}", False),
             (f"{Emote.STAR} Minimum Stars", f"> {stars} {Emote.STAR} {Emote.EDIT}", False),
+            (f"{Emote.NSFW} NSFW", f"> {nsfw_allowed}" , False)
             ]
         
         embed = Embed(
