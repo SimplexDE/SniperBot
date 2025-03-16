@@ -4,6 +4,7 @@ from discord import app_commands
 
 from util.embed import Embed
 from util.constants import Emote
+from util.logger import log
 from database.mongoclient import SpongiperClient
 
 class Commands(commands.Cog):
@@ -395,8 +396,8 @@ class Commands(commands.Cog):
         
 async def setup(bot):
     await bot.add_cog(Commands(bot))
-    print(f"> {__name__} loaded")
+    log.debug(f"{__name__} loaded")
     
 async def teardown(bot):
     await bot.remove_cog(Commands(bot))
-    print(f"> {__name__} unloaded")
+    log.debug(f"{__name__} unloaded")

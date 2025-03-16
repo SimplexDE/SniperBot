@@ -3,6 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from util.checks import is_dev
+from util.logger import log
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
 ATTACHMENTS_SRC = "./attachments"
@@ -92,8 +93,8 @@ class Developer(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Developer(bot))
-    print(f"> {__name__} loaded")
+    log.debug(f"{__name__} loaded")
     
 async def teardown(bot):
     await bot.remove_cog(Developer(bot))
-    print(f"> {__name__} unloaded")
+    log.debug(f"{__name__} unloaded")

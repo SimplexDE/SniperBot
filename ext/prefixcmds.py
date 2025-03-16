@@ -1,4 +1,5 @@
 from discord.ext import commands
+from util.logger import log
 
 class PrefixCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -18,8 +19,8 @@ class PrefixCommands(commands.Cog):
     
 async def setup(bot):
     await bot.add_cog(PrefixCommands(bot))
-    print(f"> {__name__} loaded")
+    log.debug(f"{__name__} loaded")
     
 async def teardown(bot):
     await bot.remove_cog(PrefixCommands(bot))
-    print(f"> {__name__} unloaded")
+    log.debug(f"{__name__} unloaded")

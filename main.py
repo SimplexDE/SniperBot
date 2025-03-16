@@ -7,10 +7,9 @@ import random
 from dotenv import get_key
 from discord.ext import commands, tasks
 
+from util.logger import log
 from util.embed import Embed
 from util.constants import ONLINE_PRESENCES, STARTUP_PRESENCES
-
-# TODO: Implement Loguru Library for logging
 
 intents = discord.Intents.default()
 intents.members = True
@@ -44,7 +43,7 @@ class Sniper(commands.Bot):
 
     @tasks.loop(minutes=30)
     async def cleanup(self):
-        print("> Cleaning...")
+        log.info("Running Cleanup Task...")
         for server_dir in os.listdir("./attachments"):
             if len(os.listdir(f"./attachments/{server_dir}")) == 0:
                 os.rmdir(f"./attachments/{server_dir}")
@@ -68,25 +67,29 @@ class Sniper(commands.Bot):
 
     @tasks.loop(minutes=15)
     async def presence_tick(self):
+        log.info("Running Presence Tick...")
         await self.change_presence(
             activity=random.choice(ONLINE_PRESENCES), status=discord.Status.online
         )
 
     async def setup_hook(self):
+        log.debug("Starting Cleanup Task...")
         self.cleanup.start()
     
     async def on_connect(self):
+        log.debug("Setting Presence to Startup Presence...")
         await self.change_presence(
             activity=random.choice(STARTUP_PRESENCES), status=discord.Status.dnd
         )
 
     async def on_ready(self):
         
+        log.trace("Loading Extensions...")
         for extension in self._get_extenstions():
             await self.load_extension(extension)
         
-        
         # TODO: Make this its own function / separate out into a file ----------------------------------------
+        log.debug("Grabbing Channel Text Histories...")
         log_channel = self.get_channel(int(1325196683776229410))
         _guilds = self.guilds
         text_channels_count = 0
@@ -111,6 +114,8 @@ class Sniper(commands.Bot):
                     msgs += len(self.message_cache[channel.id])
                     text_channels_retrieved += 1
             guilds_retrieved += 1
+            
+        log.debug("Grabbed all Text Histories...")
         # --------------------------------------------------------------------------------------------------------------------------
             
         embed = Embed(
@@ -124,12 +129,12 @@ class Sniper(commands.Bot):
         await log_channel.send(embed=embed.StandardEmbed())
     
         sync = await self.tree.sync()
-        print(f"> Synced {len(sync)} commands")
+        log.info(f"Synced {len(sync)} commands")
     
         self.presence_tick.start()
     
-        print(
-            f"[✓] >> {self.user.name} Ready"
+        log.success(
+            f"{self.user.name} Ready"
             )
 
 # Shutdown Handler

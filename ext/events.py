@@ -9,6 +9,7 @@ from database.mongoclient import SpongiperClient
 
 from util.quote import Quote
 from util.embed import Embed
+from util.logger import log
 from ext.developer import blocklist
 from util.constants import COLORS, ATTACHMENTS_SRC, Emote
 
@@ -306,8 +307,8 @@ class Events(commands.Cog):
     
 async def setup(bot):
     await bot.add_cog(Events(bot))
-    print(f"> {__name__} loaded")
+    log.debug(f"{__name__} loaded")
     
 async def teardown(bot):
     await bot.remove_cog(Events(bot))
-    print(f"> {__name__} unloaded")
+    log.debug(f"{__name__} unloaded")
