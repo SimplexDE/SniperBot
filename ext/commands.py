@@ -260,7 +260,11 @@ class Commands(commands.Cog):
     @about.error
     async def about_error(self, interaction: discord.Interaction, error: Exception):
         handle_error(interaction, error)
-        
+
+    @nuke.error
+    async def nuke_error(self, interaction: discord.Interaction, error: Exception):
+        handle_error(interaction, error)
+
     @starboard_set.error
     async def starboard_set_error(self, interaction: discord.Interaction, error: Exception):
         handle_error(interaction, error)
