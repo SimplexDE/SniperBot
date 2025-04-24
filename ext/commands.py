@@ -263,27 +263,27 @@ class Commands(commands.Cog):
 
     @nuke.error
     async def nuke_error(self, interaction: discord.Interaction, error: Exception):
-        handle_error(interaction, error)
+        await handle_error(interaction, error)
 
     @starboard_set.error
     async def starboard_set_error(self, interaction: discord.Interaction, error: Exception):
-        handle_error(interaction, error)
+        await handle_error(interaction, error)
 
     @starboard_unset.error
     async def starboard_unset_error(self, interaction: discord.Interaction, error: Exception):
-        handle_error(interaction, error)
+        await handle_error(interaction, error)
         
     @stars.error
     async def stars_error(self, interaction: discord.Interaction, error: Exception):
-        handle_error(interaction, error)
+        await handle_error(interaction, error)
 
     @quote_set.error
     async def quote_set_error(self, interaction: discord.Interaction, error: Exception):
-        handle_error(interaction, error)
+        await handle_error(interaction, error)
         
     @quote_unset.error
     async def quote_unset_error(self, interaction: discord.Interaction, error: Exception):
-        handle_error(interaction, error)
+        await handle_error(interaction, error)
         
 async def setup(bot):
     await bot.add_cog(Commands(bot))

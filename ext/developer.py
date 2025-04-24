@@ -42,11 +42,11 @@ class Developer(commands.Cog):
         
     @block.error
     async def block_error(self, interaction: discord.Interaction, error: Exception):
-        handle_error(interaction, error)
+        await handle_error(interaction, error)
         
     @unblock.error
     async def unblock_error(self, interaction: discord.Interaction, error: Exception):
-        handle_error(interaction, error)
+        await handle_error(interaction, error)
 
 async def setup(bot):
     await bot.add_cog(Developer(bot))
