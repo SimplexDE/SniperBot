@@ -16,6 +16,10 @@ class PrefixCommands(commands.Cog):
     @commands.command(name="simplex", aliases=["simpi", "smplx"])
     async def simplex_prefixcommand(self, context: commands.Context):
         await context.reply("Simplex ist ein cooler dude.")
+
+    @commands.command(name="juox", aliases=["juxl", "juxi"])
+    async def juox_prefixcommand(self, context: commands.Context):
+        await context.reply("Juox ist ein cooler dude.")
     
 async def setup(bot):
     await bot.add_cog(PrefixCommands(bot))

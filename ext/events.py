@@ -92,18 +92,21 @@ class Events(commands.Cog):
         i = 0
         
         if not reuse:
-            for f in os.listdir(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}"):
-                if i == 0:
-                    embeds.pop(0)
-                    embed.image_url = f"attachment://{f}"
-                    embeds.append(embed.BigEmbed())
-                
-                embed_n = Embed(title=author, color=color, title_icon_url=author_url, footer=footer, image_url=f"attachment://{f}")
-                
-                if i != 0:
-                    embeds.append(embed_n.BigEmbed())
-                files.append(discord.File(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}/{f}"))
-                i += 1
+            if os.listdir(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}") is None:
+                pass
+            else:
+                for f in os.listdir(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}"):
+                    if i == 0:
+                        embeds.pop(0)
+                        embed.image_url = f"attachment://{f}"
+                        embeds.append(embed.BigEmbed())
+                    
+                    embed_n = Embed(title=author, color=color, title_icon_url=author_url, footer=footer, image_url=f"attachment://{f}")
+                    
+                    if i != 0:
+                        embeds.append(embed_n.BigEmbed())
+                    files.append(discord.File(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}/{f}"))
+                    i += 1
                 
         if reuse:
             embed_urls = [embed.image.url for embed in self.last_sent_from_bot[message.guild.id][message.channel.id].embeds]
