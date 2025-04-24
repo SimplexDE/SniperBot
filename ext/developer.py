@@ -2,6 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from typing import Optional
+
 from util.checks import is_dev
 from util.errorhandling import handle_error
 from util.logger import log
@@ -39,7 +41,21 @@ class Developer(commands.Cog):
         blocklist.pop(blocklist.index(member.id))
         
         await interaction.response.send_message(f"{member.name} is unblocked.", allowed_mentions=None, ephemeral=True)
+
+    @is_dev()
+    @execute.command(name="say", description="Say something as Spongiper")
+    async def say(self, interaction: discord.Interaction, message: str, channel: Optional[discord.TextChannel]):
+        chn = interaction.channel
+        if channel:
+            chn = channel
         
+        await chn.send(message)
+        await interaction.response.send_message("\\^o^/", ephemeral=True)
+    
+    @say.error
+    async def say_error(self, interaction: discord.Interaction, error: Exception):
+        await handle_error(interaction, error)
+    
     @block.error
     async def block_error(self, interaction: discord.Interaction, error: Exception):
         await handle_error(interaction, error)

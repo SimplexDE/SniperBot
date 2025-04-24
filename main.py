@@ -121,8 +121,8 @@ class Sniper(commands.Bot):
         embed = Embed(
             title="History-Grabber",
             description= \
-                f"Guilds retrieved: `{guilds_retrieved}/{guilds_count} -|- {guilds_retrieved / guilds_count * 100}%`" +
-                f"\nChannels retrieved: `{text_channels_retrieved}/{text_channels_count} -|- {text_channels_retrieved / text_channels_count * 100}%`" + 
+                f"Guilds retrieved: `{guilds_retrieved}/{guilds_count} -|- {round(guilds_retrieved / guilds_count * 100)}%`" +
+                f"\nChannels retrieved: `{text_channels_retrieved}/{text_channels_count} -|- {round(text_channels_retrieved / text_channels_count * 100)}%`" + 
                 f"\nMessages collected: **`{msgs}`**"
         )
                 
