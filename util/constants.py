@@ -38,13 +38,22 @@ ONLINE_PRESENCES = [
     discord.CustomActivity(name="Reviewing quotes"),
     discord.CustomActivity(name="Quoting people"),
     discord.CustomActivity(name="Danke Simplex"),
+    discord.CustomActivity(name="Danke Don"),
+    discord.CustomActivity(name="Danke Juox"),
+    discord.CustomActivity(name="Danke ZS"),
+    discord.CustomActivity(name="Pfennichfuchsen!"),
+    discord.CustomActivity(name="BILLIG BILLIG BILLIG"),
+    discord.CustomActivity(name="Sauferstoffcord"),
     discord.Activity(type=discord.ActivityType.playing, name="Aale und Rolltreppen"),
     discord.Activity(type=discord.ActivityType.watching, name="Don"),
     discord.Activity(type=discord.ActivityType.watching, name="Juox"),
     discord.Activity(type=discord.ActivityType.watching, name="Simplex"),
     discord.Activity(type=discord.ActivityType.watching, name="ZS"),
+    discord.Activity(type=discord.ActivityType.watching, name="Spongebob Squarepants"),
     discord.Streaming(name="Technikstube", url="https://www.youtube.com/watch?v=d1YBv2mWll0"),
     discord.Streaming(name="Der Keller", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
+    discord.Streaming(name="Silly Server", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
+    discord.Streaming(name="Geizhalshandschlag", url="https://www.youtube.com/watch?v=Mzv6ZsEj8HE")
 ]
 
 STARTUP_PRESENCES = [
