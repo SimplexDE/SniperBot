@@ -12,9 +12,12 @@ async def handle_error(interaction: discord.Interaction, error: Exception):
         elif isinstance(error, app_commands.errors.CommandOnCooldown):
             await interaction.response.send_message("You are currently on cooldown.", ephemeral=True)
             return
+        elif isinstance(error, discord.Forbidden):
+            await interaction.response.send_message("I am not allowed to do that.", ephemeral=True)
+            return
         elif isinstance(error, app_commands.errors.AppCommandError):
             await interaction.response.send_message("Something went wrong, try again.", ephemeral=True)
-            log.execption(error)
+            log.exception(error)
             return
         elif isinstance(error, app_commands.errors.CommandInvokeError):
             await interaction.response.send_message("Something went wrong, check your arguments.", ephemeral=True)
@@ -24,5 +27,5 @@ async def handle_error(interaction: discord.Interaction, error: Exception):
             return
         else:
             await interaction.response.send_message("Unknown error, please contact the developer about this.", ephemeral=True)
-            log.execption(error)
+            log.exception(error)
             return
