@@ -65,6 +65,7 @@ class Commands(commands.Cog):
         await interaction.response.send_message(embed=embed.StandardEmbed())
 
     @app_commands.command(name="nsfw", description="Toggle if NSFW Content is allowed")
+    @app_commands.default_permissions(maange_channels=True)
     @app_commands.allowed_installs(guilds=True, users=False)
     async def nsfw_toggle(self, interaction: discord.Interaction):
         
