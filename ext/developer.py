@@ -50,7 +50,7 @@ class Developer(commands.Cog):
             chn = channel
         
         await chn.send(message)
-        await interaction.response.send_message("\\^o^/", ephemeral=True)
+        await interaction.response.send_message(">_<", ephemeral=True)
     
     @say.error
     async def say_error(self, interaction: discord.Interaction, error: Exception):
