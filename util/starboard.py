@@ -83,7 +83,7 @@ class Starboard:
         settings = db_guild.settings
         
         try:
-            message = await starboard.fetch_message(settings["starredMessages"][str(message.id)]["starMessage_id"])
+            message = await starboard.fetch_message(int(settings["starredMessages"][str(message.id)]["message_id"]))
             await message.edit(embed=self._get_embed(message, stars))
         except discord.NotFound:
             await self._add_to_board(starboard, message, stars)
