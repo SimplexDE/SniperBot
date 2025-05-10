@@ -230,7 +230,7 @@ class Events(commands.Cog):
         
         if self.bot.user in mentions:
             if message.type != discord.MessageType.reply:
-                await message.reply("> :warning: Ohne Nachricht, kein Zitat :person_shrugging:", allowed_mentions=None, delete_after=5)
+                await message.add_reaction("❔")
                 return
             
             if message.channel.is_nsfw():
@@ -256,7 +256,7 @@ class Events(commands.Cog):
                 msg = ref.cached_message
                 
             if msg.author.bot:
-                await message.reply("> :warning: Roboter zitiert man nicht! :robot:", allowed_mentions=None, delete_after=5)
+                await message.add_reaction("❌")
                 return
             
             origin = await message.reply("Wird generiert...")
@@ -284,9 +284,8 @@ class Events(commands.Cog):
             if "quote_channel" in settings:
                 channel = self.bot.get_channel(settings["quote_channel"])
             
-            await origin.delete(delay=1)
             quote = await channel.send(embed=embed.BigEmbed(), allowed_mentions=None, file=attachment)
-            await message.reply(f"Zitat erstellt: {quote.jump_url}", silent=True, delete_after=5)
+            await origin.edit(content=f"Zitat erstellt: {quote.jump_url}")
             
     @commands.Cog.listener(name="on_raw_reaction_add")
     async def star_added_raw(self, payload: discord.RawReactionActionEvent):
