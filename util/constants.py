@@ -52,7 +52,7 @@ ONLINE_PRESENCES = [
     discord.Activity(type=discord.ActivityType.watching, name="Spongebob Squarepants"),
     discord.Streaming(name="Technikstube", url="https://www.youtube.com/watch?v=d1YBv2mWll0"),
     discord.Streaming(name="Der Keller", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
-    discord.Streaming(name="Silly Server", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
+    discord.Streaming(name="Die Stube", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
     discord.Streaming(name="Geizhalshandschlag", url="https://www.youtube.com/watch?v=Mzv6ZsEj8HE")
 ]
 

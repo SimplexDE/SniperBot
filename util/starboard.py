@@ -42,53 +42,71 @@ class Starboard:
                 return reaction.count
 
     async def _add_to_board(self, starboard: discord.TextChannel, message: discord.Message, stars: int):
-        db_guild = await self.client.get_guild(message.guild.id)
-        settings = db_guild.settings
+        if message.guild.id is None:
+            return
         
-        board_message = await starboard.send(embed=self._get_embed(message, stars))
+        lock = self._get_guild_lock(message.guild.id)
         
-        settings["starredMessages"][str(message.id)] = {}
-        settings["starredMessages"][str(message.id)]["message_id"] = str(message.id)
-        settings["starredMessages"][str(message.id)]["starMessage_id"] = str(board_message.id)
-        self.bot.message_cache[message.id] = board_message
-        
-        db_guild.settings = settings
+        async with lock:
+            db_guild = await self.client.get_guild(message.guild.id)
+            settings = db_guild.settings
+            
+            board_message = await starboard.send(embed=self._get_embed(message, stars))
+            
+            settings["starredMessages"][str(message.id)] = {}
+            settings["starredMessages"][str(message.id)]["message_id"] = str(message.id)
+            settings["starredMessages"][str(message.id)]["starMessage_id"] = str(board_message.id)
+            self.bot.message_cache[message.id] = board_message
+            
+            db_guild.settings = settings
     
     async def _remove_from_board(self, starboard: discord.TextChannel, message: discord.Message):
-        db_guild = await self.client.get_guild(message.guild.id)
-        settings = db_guild.settings
-
-        if message.id in self.bot.message_cache:
-            await self.bot.message_cache[message.id].delete()
-            self.bot.message_cache.pop(message.id)
-            del settings["starredMessages"][str(message.id)]
-            db_guild.settings = settings
+        if message.guild.id is None:
             return
         
-        message = await starboard.fetch_message(settings["starredMessages"][str(message.id)]["starMessage_id"])
+        lock = self._get_guild_lock(message.guild.id)
         
-        del settings["starredMessages"][str(message.id)]
-        await message.delete()
-        db_guild.settings = settings
+        async with lock:
+            db_guild = await self.client.get_guild(message.guild.id)
+            settings = db_guild.settings
+
+            if message.id in self.bot.message_cache:
+                await self.bot.message_cache[message.id].delete()
+                self.bot.message_cache.pop(message.id)
+                del settings["starredMessages"][str(message.id)]
+                db_guild.settings = settings
+                return
+            
+            message = await starboard.fetch_message(settings["starredMessages"][str(message.id)]["starMessage_id"])
+            
+            del settings["starredMessages"][str(message.id)]
+            await message.delete()
+            db_guild.settings = settings
     
     async def _refresh_board_message(self, starboard: discord.TextChannel, message: discord.Message, stars: int):
-        if message.id in self.bot.message_cache:
-            try:
-                await self.bot.message_cache[message.id].edit(embed=self._get_embed(message, stars))
-            except discord.NotFound:
-                await self._add_to_board(starboard, message, stars)
+        if message.guild.id is None:
             return
         
-        db_guild = await self.client.get_guild(message.guild.id)
-        settings = db_guild.settings
+        lock = self._get_guild_lock(message.guild.id)
         
-        try:
-            message = await starboard.fetch_message(int(settings["starredMessages"][str(message.id)]["message_id"]))
-            await message.edit(embed=self._get_embed(message, stars))
-        except discord.NotFound:
-            await self._add_to_board(starboard, message, stars)
-        except KeyError:
-            pass
+        async with lock:
+            if message.id in self.bot.message_cache:
+                try:
+                    await self.bot.message_cache[message.id].edit(embed=self._get_embed(message, stars))
+                except discord.NotFound:
+                    await self._add_to_board(starboard, message, stars)
+                return
+            
+            db_guild = await self.client.get_guild(message.guild.id)
+            settings = db_guild.settings
+            
+            try:
+                message = await starboard.fetch_message(int(settings["starredMessages"][str(message.id)]["message_id"]))
+                await message.edit(embed=self._get_embed(message, stars))
+            except discord.NotFound:
+                await self._add_to_board(starboard, message, stars)
+            except KeyError:
+                pass
     
     def _get_guild_lock(self, guild_id: int) -> asyncio.Lock:
         if guild_id not in self.guild_locks:
@@ -96,89 +114,83 @@ class Starboard:
         return self.guild_locks[guild_id]
     
     async def process(self, payload: discord.RawReactionActionEvent | discord.RawReactionClearEvent | discord.RawReactionClearEmojiEvent):
-        if payload.guild_id is None:
+        db_guild = await self.client.get_guild(payload.guild_id)
+        settings = db_guild.settings
+
+        channel: discord.GuildChannel = self.bot.get_channel(payload.channel_id)
+        message: discord.Message = await channel.fetch_message(payload.message_id)
+        emoji = None
+        action = None
+        try:
+            emoji: discord.PartialEmoji = payload.emoji
+        
+            if emoji != discord.PartialEmoji(name="⭐"):
+                return
+
+            action = payload.event_type
+        except Exception:
+            pass    
+        
+        stars = self._get_emoji_count("⭐", message.reactions)
+        
+        if "starboard_channel" not in settings:
             return
         
-        lock = self._get_guild_lock(payload.guild_id)
+        starboard = self.bot.get_channel(settings["starboard_channel"])
         
-        async with lock:
-            db_guild = await self.client.get_guild(payload.guild_id)
-            settings = db_guild.settings
+        if starboard is None:
+            return
+        
+        if message is None:
+            return
 
-            channel: discord.GuildChannel = self.bot.get_channel(payload.channel_id)
-            message: discord.Message = await channel.fetch_message(payload.message_id)
-            emoji = None
-            action = None
-            try:
-                emoji: discord.PartialEmoji = payload.emoji
-            
-                if emoji != discord.PartialEmoji(name="⭐"):
-                    return
+        if "stars" not in settings:
+            settings["stars"] = 3 # Default
 
-                action = payload.event_type
-            except Exception:
-                pass    
-            
-            stars = self._get_emoji_count("⭐", message.reactions)
-            
-            if "starboard_channel" not in settings:
-                return
-            
-            starboard = self.bot.get_channel(settings["starboard_channel"])
-            
-            if starboard is None:
-                return
-            
-            if message is None:
-                return
-
-            if "stars" not in settings:
-                settings["stars"] = 3 # Default
-
-            if "starredMessages" not in settings:
-                settings["starredMessages"] = {}
-            
-            db_guild.settings = settings
-            
-            match (action):
-                case ("REACTION_ADD"):
-                    if message.author.id == payload.user_id:
-                        await message.remove_reaction("⭐", message.author)
-                        return await self._refresh_board_message(starboard, message, stars)  
-                    if str(message.id) in settings["starredMessages"]:
-                        return await self._refresh_board_message(starboard, message, stars)
-                    
-                    if stars >= settings["stars"]:                    
-                        return await self._add_to_board(starboard, message, stars)
-                    return
+        if "starredMessages" not in settings:
+            settings["starredMessages"] = {}
+        
+        db_guild.settings = settings
+        
+        match (action):
+            case ("REACTION_ADD"):
+                if message.author.id == payload.user_id:
+                    await message.remove_reaction("⭐", message.author)
+                    return await self._refresh_board_message(starboard, message, stars)  
+                if str(message.id) in settings["starredMessages"]:
+                    return await self._refresh_board_message(starboard, message, stars)
                 
-                case ("REACTION_REMOVE"):                
-                    if stars is None:
-                        if str(message.id) not in settings["starredMessages"]:
-                            return
-                        return await self._remove_from_board(starboard, message)
-                    
-                    if stars < settings["stars"]:
-                        if str(message.id) not in settings["starredMessages"]:
-                            return
-                        return await self._remove_from_board(starboard, message)
-                    
-                    if str(message.id) in settings["starredMessages"]:
-                        return await self._refresh_board_message(starboard, message, stars)
-                    
-                    if stars >= settings["stars"]:                    
-                        return await self._add_to_board(starboard, message, stars)
-                    return
+                if stars >= settings["stars"]:                    
+                    return await self._add_to_board(starboard, message, stars)
+                return
+            
+            case ("REACTION_REMOVE"):                
+                if stars is None:
+                    if str(message.id) not in settings["starredMessages"]:
+                        return
+                    return await self._remove_from_board(starboard, message)
                 
-                    
-                case (_):
-                    if stars is None:
-                        if str(message.id) not in settings["starredMessages"]:
-                            return
-                        return await self._remove_from_board(starboard, message)
-                    
-                    if stars < settings["stars"]:
-                        if str(message.id) not in settings["starredMessages"]:
-                            return
-                        return await self._remove_from_board(starboard, message)
+                if stars < settings["stars"]:
+                    if str(message.id) not in settings["starredMessages"]:
+                        return
+                    return await self._remove_from_board(starboard, message)
+                
+                if str(message.id) in settings["starredMessages"]:
+                    return await self._refresh_board_message(starboard, message, stars)
+                
+                if stars >= settings["stars"]:                    
+                    return await self._add_to_board(starboard, message, stars)
+                return
+            
+                
+            case (_):
+                if stars is None:
+                    if str(message.id) not in settings["starredMessages"]:
+                        return
+                    return await self._remove_from_board(starboard, message)
+                
+                if stars < settings["stars"]:
+                    if str(message.id) not in settings["starredMessages"]:
+                        return
+                    return await self._remove_from_board(starboard, message)
         
