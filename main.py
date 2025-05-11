@@ -11,6 +11,8 @@ from util.logger import log
 from util.embed import Embed
 from util.constants import ONLINE_PRESENCES, STARTUP_PRESENCES
 
+from prometheus.client import BOT_STATUS, SERVER_COUNT
+
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -74,6 +76,7 @@ class Sniper(commands.Bot):
 
     async def setup_hook(self):
         log.debug("Starting Cleanup Task...")
+        BOT_STATUS.state("starting")
         self.cleanup.start()
     
     async def on_connect(self):
@@ -99,6 +102,7 @@ class Sniper(commands.Bot):
                     text_channels_count += 1
         text_channels_retrieved = 0
         guilds_count = len(_guilds)
+        SERVER_COUNT.set(guilds_count)
         guilds_retrieved = 0
         msgs = 0
         
@@ -132,6 +136,7 @@ class Sniper(commands.Bot):
         log.info(f"Synced {len(sync)} commands")
     
         self.presence_tick.start()
+        BOT_STATUS.state("running")
     
         log.success(
             f"{self.user.name} Ready"
@@ -149,6 +154,7 @@ def shutdown_handler(signum, frame):
     loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
     loop.close()
 
+    BOT_STATUS.state("stopped")
     sys.exit(0)
 
 

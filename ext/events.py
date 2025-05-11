@@ -7,6 +7,7 @@ from util.antispam import Antispam
 from util.starboard import Starboard
 from database.mongoclient import SpongiperClient
 
+from prometheus.client import MESSAGES_SNIPED
 from util.quote import Quote
 from util.embed import Embed
 from util.logger import log
@@ -122,6 +123,7 @@ class Events(commands.Cog):
                     embeds.append(embed_n.BigEmbed())
                 i += 1
                 
+        MESSAGES_SNIPED.inc(1)
         self.last_sent_from_bot[message.guild.id][message.channel.id] = await message.channel.send(embeds=embeds, files=files if reuse is False else None)
         
     @commands.Cog.listener(name="on_message_delete")
@@ -302,7 +304,7 @@ class Events(commands.Cog):
     @commands.Cog.listener(name="on_raw_reaction_clear_emoji")
     async def star_clear_emoji_raw(self, payload: discord.RawReactionActionEvent):
         await self.starboard.process(payload)
-        
+
     @commands.Cog.listener(name="on_guild_remove")
     async def guild_remove(self, guild: discord.Guild):
         self.client.delete_guild(guild.id)
