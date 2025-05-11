@@ -13,7 +13,6 @@ class Statistic(commands.Cog):
         self.websocket_latency.start()
         self.uptime_checker.start()
         self.calculate_user.start()
-        self.save.start()
         self.up_since = datetime.now(pytz.timezone("Europe/Berlin"))
 
     
