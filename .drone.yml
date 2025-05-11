@@ -65,7 +65,7 @@ steps:
       from_secret: sniperbot_token
   commands:
   - docker pull 192.168.2.10:5000/sniperbot:latest
-  - docker run -d --name sniperbot --restart "unless-stopped" --network bridge -p 4000:4000 -e "TOKEN"="$TOKEN" -e "DATABASE_NAME"="sniperbot" 192.168.2.10:5000/sniperbot:latest
+  - docker run -d --name sniperbot --restart "unless-stopped" --network bridge -p 4000:4000 -e "TOKEN"="$TOKEN" -e "LOKI_URL"="http://192.168.2.10:3100/loki/api/v1/push" -e "DATABASE_NAME"="sniperbot" 192.168.2.10:5000/sniperbot:latest
   when:
     event:
     - pull_request

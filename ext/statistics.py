@@ -2,8 +2,9 @@ import discord
 import pytz
 from datetime import datetime
 from discord.ext import commands, tasks
+from database.mongoclient import SpongiperClient
 
-from prometheus.client import SERVER_COUNT, MESSAGES, BOT_LATENCY, BOT_UPTIME, USER_COUNT
+from stats.client import BOT_LATENCY, BOT_STATUS, BOT_UPTIME, MESSAGES, MESSAGES_SNIPED, SERVER_COUNT, USER_COUNT
 from util.logger import log
 
 class Statistic(commands.Cog):
@@ -12,7 +13,9 @@ class Statistic(commands.Cog):
         self.websocket_latency.start()
         self.uptime_checker.start()
         self.calculate_user.start()
+        self.save.start()
         self.up_since = datetime.now(pytz.timezone("Europe/Berlin"))
+
     
     @tasks.loop(minutes=1)
     async def websocket_latency(self):

@@ -8,8 +8,7 @@ USER_COUNT = Gauge('sniper_bot_user_count', 'How many Users Spongiper has')
 MESSAGES = Counter('sniper_bot_messages', 'Statistic how many message events were received')
 BOT_LATENCY = Gauge('sniper_bot_latency', 'Snipers Latency')
 BOT_UPTIME = Gauge('sniper_bot_uptime', 'Uptime of Sniper Bot')
-BOT_STATUS = Enum('sniper_bot_state', 'The State Spongiper is currently in',
+BOT_STATUS = Enum('sniper_bot_state', 'The state Spongiper is currently in',
                     states=['starting', "running", 'stopped'])
 
 start_http_server(4000)
-

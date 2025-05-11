@@ -11,7 +11,7 @@ from util.logger import log
 from util.embed import Embed
 from util.constants import ONLINE_PRESENCES, STARTUP_PRESENCES
 
-from prometheus.client import BOT_STATUS, SERVER_COUNT
+from stats.client import BOT_STATUS, SERVER_COUNT
 
 intents = discord.Intents.default()
 intents.members = True

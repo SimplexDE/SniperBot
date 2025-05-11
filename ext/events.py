@@ -7,7 +7,7 @@ from util.antispam import Antispam
 from util.starboard import Starboard
 from database.mongoclient import SpongiperClient
 
-from prometheus.client import MESSAGES_SNIPED
+from stats.client import MESSAGES_SNIPED
 from util.quote import Quote
 from util.embed import Embed
 from util.logger import log
