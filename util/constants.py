@@ -3,6 +3,13 @@ import discord
 class VIP:
     DEVELOPER = 579111799794958377
     BOT = 862859543700176896
+    VIPS = [
+        579111799794958377, # Simplex
+        678671564396429322, # Songbird / Don
+        648215020941082644, # ZS
+        507517299746537472, # Juox
+        1055981447183335444, # Nuna
+    ]
 
 class Emote:
     SPACER = "<:spacer:1226137637148950559>"
@@ -37,6 +44,8 @@ ONLINE_PRESENCES = [
     discord.CustomActivity(name="Stalking for deleted messages"),
     discord.CustomActivity(name="Reviewing quotes"),
     discord.CustomActivity(name="Quoting people"),
+    discord.CustomActivity(name="Partei 77"),
+    discord.CustomActivity(name="Freie Discord User"),
     discord.CustomActivity(name="Danke Simplex"),
     discord.CustomActivity(name="Danke Don"),
     discord.CustomActivity(name="Danke Juox"),
@@ -44,6 +53,7 @@ ONLINE_PRESENCES = [
     discord.CustomActivity(name="Pfennichfuchsen!"),
     discord.CustomActivity(name="BILLIG BILLIG BILLIG"),
     discord.CustomActivity(name="Sauferstoffcord"),
+    discord.CustomActivity(name="Adosa du H*rensohn"),
     discord.Activity(type=discord.ActivityType.playing, name="Aale und Rolltreppen"),
     discord.Activity(type=discord.ActivityType.watching, name="Don"),
     discord.Activity(type=discord.ActivityType.watching, name="Juox"),

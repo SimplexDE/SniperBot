@@ -1,6 +1,8 @@
 from discord.ext import commands
 from util.logger import log
 
+import random
+
 class PrefixCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
@@ -20,6 +22,10 @@ class PrefixCommands(commands.Cog):
     @commands.command(name="juox", aliases=["juxl", "juxi"])
     async def juox_prefixcommand(self, context: commands.Context):
         await context.reply("Juox ist ein cooler dude.")
+        
+    @commands.command(name="adosa", aliases=["adoser", "adobsi"])
+    async def adosa_prefixcommand(self, context: commands.Context):
+        await context.reply(random.choice(["Adosa ist ein cooler dude.", "Adosa so ein H*rensohn."]))
     
 async def setup(bot):
     await bot.add_cog(PrefixCommands(bot))
