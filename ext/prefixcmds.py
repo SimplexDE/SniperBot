@@ -25,7 +25,11 @@ class PrefixCommands(commands.Cog):
         
     @commands.command(name="adosa", aliases=["adoser", "adobsi"])
     async def adosa_prefixcommand(self, context: commands.Context):
-        await context.reply(random.choice(["Adosa ist ein cooler dude.", "Adosa so ein H*rensohn."]))
+        await context.reply("Adosa ist ein cooler dude.")
+        
+    @commands.command(name="nuna", aliases=[])
+    async def nuna_prefixcommand(self, context: commands.Context):
+        await context.reply("Nuna ist cool.")
     
 async def setup(bot):
     await bot.add_cog(PrefixCommands(bot))
