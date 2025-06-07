@@ -221,7 +221,7 @@ class Commands(commands.Cog):
         settings = db_guild.settings
         
         fields = [
-            (f"{Emote.ARROW_RIGHT} Channel", f"> {channel.mention} {Emote.EDIT}", False),
+            (f"{Emote.RIGHT_ARROW} Channel", f"> {channel.mention} {Emote.EDIT}", False),
             ]
         
         embed = Embed(
