@@ -228,6 +228,9 @@ class Events(commands.Cog):
 
         if not message.embeds:
             return
+        
+        if message.guild.id != 1247839863408164868:
+            return
 
         for embed in message.embeds:
             text_to_check = []

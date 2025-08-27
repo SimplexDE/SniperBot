@@ -63,8 +63,9 @@ ONLINE_PRESENCES = [
     discord.Activity(type=discord.ActivityType.watching, name="Adosa"),
     discord.Activity(type=discord.ActivityType.watching, name="Spongebob Squarepants"),
     discord.Streaming(name="Technikstube", url="https://www.youtube.com/watch?v=d1YBv2mWll0"),
-    discord.Streaming(name="Der Keller", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
-    discord.Streaming(name="Die Stube", url="https://www.youtube.com/watch?v=xvFZjo5PgG0"),
+    discord.Streaming(name="nacht.bus", url="https://www.youtube.com/watch?v=PKQPey6L42M"),
+    discord.Streaming(name="Der Keller", url="https://www.youtube.com/watch?v=ow5XgHDkPOQ"),
+    discord.Streaming(name="Die Stube", url="https://www.youtube.com/watch?v=0uksSl1Teek"),
     discord.Streaming(name="Geizhalshandschlag", url="https://www.youtube.com/watch?v=Mzv6ZsEj8HE")
 ]
 
