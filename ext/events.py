@@ -2,6 +2,8 @@ import discord
 import random
 import os
 import pytz
+import datetime
+import asyncio
 from discord.ext import commands
 from util.antispam import Antispam
 from util.starboard import Starboard
@@ -25,6 +27,7 @@ class Events(commands.Cog):
         self.last_sent_from_bot = {}
         self.last_sent = {}
         self.blocklist = blocklist
+        self.scheduled = False
         
     @commands.Cog.listener(name="on_message")
     async def snipe(self, message: discord.Message):
@@ -225,6 +228,103 @@ class Events(commands.Cog):
             self.last_message[message.guild.id][message.channel.id] = None
 
         self.last_message[message.guild.id][message.channel.id] = message
+
+    
+    @commands.Cog.listener("on_message")
+    async def disboard_listener(self, message: discord.Message):  
+
+        DISBOARD_ID = 862859543700176896
+
+        await self.schedule_reminder()
+
+        # Nur DISBOARD-Nachrichten berücksichtigen
+        if not message.author or message.author.id != DISBOARD_ID:
+            return
+
+        if not message.embeds:
+            return
+
+        for embed in message.embeds:
+            text_to_check = []
+
+            # Description prüfen
+            if embed.description:
+                text_to_check.append(embed.description.lower())
+
+            # Alle Felder prüfen
+            for field in embed.fields:
+                if field.name:
+                    text_to_check.append(field.name.lower())
+                if field.value:
+                    text_to_check.append(field.value.lower())
+
+            # Alles zusammenfassen
+            combined_text = " ".join(text_to_check)
+
+            # Auf "bump erfolgreich" prüfen
+            if "bump erfolgreich" in combined_text:
+                print("✅ DISBOARD Bump erkannt!")
+
+                # Datenbank updaten
+                db_guild = await self.client.get_guild(message.guild.id)
+                guild = db_guild.settings
+                guild["last_bump"] = round(datetime.datetime.now().timestamp())
+                guild["last_bump_channel"] = message.channel.id
+                db_guild.settings = guild
+
+                # User aus der Interaction, falls vorhanden
+                user = None
+                if message.interaction_metadata:
+                    user = message.interaction_metadata.user
+
+                if user:
+                    await message.channel.send(
+                        f"Danke fürs Bumpen {user.mention}! "
+                        f"Ich werde dich in 2 Stunden wieder erinnern!\n\n"
+                        "-# Exklusives Feature für den Server `[DER KELLER]`"
+                    )
+                else:
+                    await message.channel.send(
+                        "Danke fürs Bumpen! Ich werde dich in 2 Stunden wieder erinnern!"
+                    )
+
+                # Reminder planen (2 Stunden = 7200 Sekunden)
+                await self.schedule_reminder()
+                break  # Kein doppeltes Triggern, wenn mehrere Felder passen
+    
+    async def schedule_reminder(self, delay: int=7200, guild_id=1247839863408164868):
+        _guild = self.bot.get_guild(guild_id)
+        
+        db_guild = await self.client.get_guild(_guild.id)
+        guild = db_guild.settings
+        
+        if "last_bump" not in guild or "last_bump_channel" not in guild:
+            return
+        
+        last_bump = guild["last_bump"]
+        last_channel = guild["last_bump_channel"]
+        
+        now = round(datetime.datetime.now().timestamp())
+        elapsed = now - last_bump
+        remaining = delay - elapsed
+        
+        remaining = max(0, remaining)
+        
+        chn = self.bot.get_channel(last_channel)
+        
+        await self.remind(chn, remaining)
+
+            
+    async def remind(self, channel, remaining):
+        if self.scheduled:
+            print("Reminder already Scheduled")
+            return
+        self.scheduled = True
+
+        print(f"reminder scheduled ({remaining})")
+        await asyncio.sleep(remaining)
+        await channel.send("Es ist Zeit zu Bumpen, Kellerfreunde!\n<@&1271932301885968484>")
+        self.scheduled = False
     
     @commands.Cog.listener(name="on_message")
     async def make_that_a_quote(self, message: discord.Message):
