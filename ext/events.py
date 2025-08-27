@@ -385,7 +385,15 @@ class Events(commands.Cog):
             
             quote = await channel.send(embed=embed.BigEmbed(), allowed_mentions=None, file=attachment)
             await origin.edit(content=f"Zitat erstellt: {quote.jump_url}")
-            
+    
+    @commands.Cog.listener(name="on_guild_join")
+    async def on_guild_join(self, guild: discord.Guild):
+        await self.bot.get_user(579111799794958377).send("+"+guild.name)
+    
+    @commands.Cog.listener(name="on_guild_remove")
+    async def on_guild_remove(self, guild: discord.Guild):
+        await self.bot.get_user(579111799794958377).send("-"+guild.name)
+    
     @commands.Cog.listener(name="on_raw_reaction_add")
     async def star_added_raw(self, payload: discord.RawReactionActionEvent):
         await self.starboard.process(payload)
