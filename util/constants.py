@@ -54,6 +54,7 @@ ONLINE_PRESENCES = [
     discord.CustomActivity(name="Pfennichfuchsen!"),
     discord.CustomActivity(name="BILLIG BILLIG BILLIG"),
     discord.CustomActivity(name="Sauferstoffcord"),
+    discord.CustomActivity(name="Penisconnoisseur"),
     discord.Activity(type=discord.ActivityType.playing, name="Aale und Rolltreppen"),
     discord.Activity(type=discord.ActivityType.watching, name="Don"),
     discord.Activity(type=discord.ActivityType.watching, name="Juox"),

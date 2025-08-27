@@ -2,9 +2,8 @@ import discord
 import pytz
 from datetime import datetime
 from discord.ext import commands, tasks
-from database.mongoclient import SpongiperClient
 
-from stats.client import BOT_LATENCY, BOT_STATUS, BOT_UPTIME, MESSAGES, MESSAGES_SNIPED, SERVER_COUNT, USER_COUNT
+from stats.client import BOT_LATENCY, BOT_UPTIME, MESSAGES, SERVER_COUNT, USER_COUNT
 from util.logger import log
 
 class Statistic(commands.Cog):

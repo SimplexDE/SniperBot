@@ -31,13 +31,13 @@ class Events(commands.Cog):
         
     @commands.Cog.listener(name="on_message")
     async def snipe(self, message: discord.Message):
-        if message.author.bot:
-            return
+        content = message.content.lower()
         
-        if message.guild is None:
-            return
-    
-        if message.author.id in self.blocklist:
+        if message.author.bot \
+        or message.guild is None \
+        or message.author.id in self.blocklist \
+        or content[0] != "s" \
+        or len(message.content) != 1:
             return
         
         if not self.last_message.get(message.guild.id):
@@ -50,14 +50,6 @@ class Events(commands.Cog):
             self.last_message[message.guild.id][message.channel.id] = None
         
         if self.last_message[message.guild.id][message.channel.id] is None:
-            return
-        
-        if len(message.content) != 1:
-            return
-            
-        content = message.content.lower()
-        
-        if content[0] != "s":
             return
         
         if await Antispam().spamming(message):
@@ -131,16 +123,9 @@ class Events(commands.Cog):
         
     @commands.Cog.listener(name="on_message_delete")
     async def save(self, message: discord.Message):
-        if self.bot.user.id == message.author.id:
-            return
-        
-        if message.author.id in self.blocklist:
-            return
-        
-        if message.guild is None:
-            return
-        
-        if len(message.embeds) != 0:
+        if self.bot.user.id == message.author.id \
+        or message.guild is None \
+        or len(message.embeds) != 0:
             return
                 
         if not os.path.exists(ATTACHMENTS_SRC):
@@ -233,7 +218,7 @@ class Events(commands.Cog):
     @commands.Cog.listener("on_message")
     async def disboard_listener(self, message: discord.Message):  
 
-        DISBOARD_ID = 862859543700176896
+        DISBOARD_ID = 302050872383242240
 
         await self.schedule_reminder()
 
@@ -263,7 +248,6 @@ class Events(commands.Cog):
 
             # Auf "bump erfolgreich" prüfen
             if "bump erfolgreich" in combined_text:
-                print("✅ DISBOARD Bump erkannt!")
 
                 # Datenbank updaten
                 db_guild = await self.client.get_guild(message.guild.id)
@@ -292,8 +276,11 @@ class Events(commands.Cog):
                 await self.schedule_reminder()
                 break  # Kein doppeltes Triggern, wenn mehrere Felder passen
     
-    async def schedule_reminder(self, delay: int=7200, guild_id=1247839863408164868):
-        _guild = self.bot.get_guild(guild_id)
+    async def schedule_reminder(self, delay: int=7200):
+        _guild = self.bot.get_guild(1247839863408164868)
+        
+        if _guild is None:
+            return
         
         db_guild = await self.client.get_guild(_guild.id)
         guild = db_guild.settings
@@ -317,7 +304,6 @@ class Events(commands.Cog):
             
     async def remind(self, channel, remaining):
         if self.scheduled:
-            print("Reminder already Scheduled")
             return
         self.scheduled = True
 
@@ -330,10 +316,18 @@ class Events(commands.Cog):
     async def make_that_a_quote(self, message: discord.Message):
         mentions = message.mentions
         
+        db_guild = await self.client.get_guild(message.guild.id)
+        settings = db_guild.settings
+        
         if self.bot.user in mentions:
             if message.type != discord.MessageType.reply:
-                await message.add_reaction("❔")
+                await message.add_reaction("🎾")
                 return
+            
+            if "blacklist" in settings:
+                if str(message.channel.id) in settings["blacklist"]:
+                    await message.reply(f"> {Emote.WARNING} Dieser Channel ist auf der Blacklist!", allowed_mentions=None, delete_after=5)
+                    return
             
             if message.channel.is_nsfw():
                 db_guild = await self.client.get_guild(message.guild.id)
@@ -358,7 +352,7 @@ class Events(commands.Cog):
                 msg = ref.cached_message
                 
             if msg.author.bot:
-                await message.add_reaction("❌")
+                await message.add_reaction("🤖")
                 return
             
             origin = await message.reply("Wird generiert...")

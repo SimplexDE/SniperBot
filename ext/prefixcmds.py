@@ -1,15 +1,9 @@
 from discord.ext import commands
 from util.logger import log
 
-import random
-
 class PrefixCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
-    
-    @commands.hybrid_command(name="help")
-    async def help_hybridcommand(self, context: commands.Context):
-        await context.reply("For help, inspect the [GitHub Page](https://github.com/SimplexDE/SniperBot).")
     
     @commands.command(name="don", aliases=["donovan", "songbird"])
     async def don_prefixcommand(self, context: commands.Context):
@@ -27,7 +21,7 @@ class PrefixCommands(commands.Cog):
     async def adosa_prefixcommand(self, context: commands.Context):
         await context.reply("Adosa ist ein cooler dude.")
         
-    @commands.command(name="nuna", aliases=[])
+    @commands.command(name="nuna", aliases=["nuner"])
     async def nuna_prefixcommand(self, context: commands.Context):
         await context.reply("Nuna ist cool.")
     

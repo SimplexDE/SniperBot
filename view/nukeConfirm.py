@@ -39,8 +39,10 @@ class NukeConfirmView(ui.View):
         
         await interaction.response.send_message("nuking")
         
-        await self.channel.clone(reason="Channel was nuked.")
+        channel = await self.channel.clone(reason="Channel was nuked.")
         await self.channel.delete(reason="Channel was nuked.")
+        
+        await channel.send("https://tenor.com/view/boom-gif-20562682")
         
         self.stop()
 
