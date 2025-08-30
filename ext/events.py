@@ -312,8 +312,7 @@ class Events(commands.Cog):
 
         print(f"reminder scheduled ({remaining})")
         await asyncio.sleep(remaining)
-        # <@&1271932301885968484>
-        await channel.send("Es ist Zeit zu Bumpen, Kellerfreunde!\n<@579111799794958377>")
+        await channel.send("Es ist Zeit zu Bumpen, Kellerfreunde!\n<@&1271932301885968484>")
         self.scheduled = False
     
     @commands.Cog.listener(name="on_message")
@@ -325,7 +324,7 @@ class Events(commands.Cog):
         
         if self.bot.user in mentions:
             if message.type != discord.MessageType.reply:
-                await message.add_reaction("🎾")
+                await message.add_reaction("🏓")
                 return
             
             if "blacklist" in settings:

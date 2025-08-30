@@ -10,6 +10,11 @@ class VIP:
         507517299746537472, # Juox
         1055981447183335444, # Nuna
     ]
+    VIP_SERVER = [
+        1030608164367913031, # Technikstube
+        1143997222107750563, # Devnikstube
+        1247839863408164868, # DER KELLER
+    ]
 
 class Emote:
     SPACER = "<:spacer:1226137637148950559>"
@@ -44,6 +49,9 @@ ONLINE_PRESENCES = [
     discord.CustomActivity(name="Stalking for deleted messages"),
     discord.CustomActivity(name="Reviewing quotes"),
     discord.CustomActivity(name="Quoting people"),
+    discord.CustomActivity(name="Technikstube: .gg/eR23G266BS"),
+    discord.CustomActivity(name="DER KELLER: .gg/3NER9SU3AH"),
+    discord.CustomActivity(name="Schleswig-Holstein - Der echte Norden"),
     discord.CustomActivity(name="Partei 77"),
     discord.CustomActivity(name="Freie Discord User"),
     discord.CustomActivity(name="Danke Simplex"),
@@ -51,25 +59,45 @@ ONLINE_PRESENCES = [
     discord.CustomActivity(name="Danke Juox"),
     discord.CustomActivity(name="Danke ZS"),
     discord.CustomActivity(name="Danke Adosa"),
+    discord.CustomActivity(name="Danke Nuna"),
+    discord.CustomActivity(name="Danke Slangdraer"),
+    discord.CustomActivity(name="Danke Keller"),
     discord.CustomActivity(name="Pfennichfuchsen!"),
     discord.CustomActivity(name="BILLIG BILLIG BILLIG"),
     discord.CustomActivity(name="Sauferstoffcord"),
     discord.CustomActivity(name="Penisconnoisseur"),
     discord.Activity(type=discord.ActivityType.playing, name="Aale und Rolltreppen"),
+    discord.Activity(type=discord.ActivityType.playing, name="mit dem Keller"),
+    discord.Activity(type=discord.ActivityType.watching, name="norden.social/@simplex"),
     discord.Activity(type=discord.ActivityType.watching, name="Don"),
     discord.Activity(type=discord.ActivityType.watching, name="Juox"),
     discord.Activity(type=discord.ActivityType.watching, name="Simplex"),
     discord.Activity(type=discord.ActivityType.watching, name="ZS"),
     discord.Activity(type=discord.ActivityType.watching, name="Adosa"),
+    discord.Activity(type=discord.ActivityType.watching, name="Nuna"),
+    discord.Activity(type=discord.ActivityType.watching, name="Slangdraer"),
     discord.Activity(type=discord.ActivityType.watching, name="Spongebob Squarepants"),
     discord.Streaming(name="Technikstube", url="https://www.youtube.com/watch?v=d1YBv2mWll0"),
-    discord.Streaming(name="nacht.bus", url="https://www.youtube.com/watch?v=PKQPey6L42M"),
+    discord.Streaming(name="Spongiper Incident", url="https://www.youtube.com/watch?v=qnIbmE5ggI4"),
     discord.Streaming(name="Der Keller", url="https://www.youtube.com/watch?v=ow5XgHDkPOQ"),
     discord.Streaming(name="Die Stube", url="https://www.youtube.com/watch?v=0uksSl1Teek"),
     discord.Streaming(name="Geizhalshandschlag", url="https://www.youtube.com/watch?v=Mzv6ZsEj8HE")
 ]
 
 STARTUP_PRESENCES = [
+    discord.CustomActivity(name="Bereitet Krabbenbürger vor..."),
+    discord.CustomActivity(name="Bereitet Patty vor..."),
+    discord.CustomActivity(name="Erzeugt Existenzkrisen..."),
+    discord.CustomActivity(name="Lädt Fehler..."),
+    discord.CustomActivity(name="Säubert den Boden..."),
+    discord.CustomActivity(name="Gießt die Pflanzen..."),
+    discord.CustomActivity(name="Trommelwirbel..."),
+    discord.CustomActivity(name="Grüßt die Nachbarn..."),
+    discord.CustomActivity(name="Erzeugt neue Welten..."),    
+    discord.CustomActivity(name="Zerstört Existenzen..."),
+    discord.CustomActivity(name="Bereinigt Psychosen..."),
+    discord.CustomActivity(name="Zählt nicht existentes Geld..."),    
+    discord.CustomActivity(name="Regiert die Bastion des Sponigpers..."),
     discord.CustomActivity(name="¯\\_(ツ)_/¯"),
     discord.CustomActivity(name="q(≧▽≦q)"),
     discord.CustomActivity(name="(^///^)"),

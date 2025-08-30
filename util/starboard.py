@@ -133,6 +133,10 @@ class Starboard:
         
         stars = self._get_emoji_count("⭐", message.reactions)
         
+        if "blacklist" in settings:
+            if str(message.channel.id) in settings["blacklist"]:
+                return   
+        
         if "starboard_channel" not in settings:
             return
         
