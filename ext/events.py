@@ -218,8 +218,8 @@ class Events(commands.Cog):
     @commands.Cog.listener("on_message")
     async def disboard_listener(self, message: discord.Message):  
 
-        # DISBOARD_ID = 302050872383242240
-        DISBOARD_ID = 862859543700176896 # Test id Spongiper
+        DISBOARD_ID = 302050872383242240
+        # DISBOARD_ID = 862859543700176896 # Test id Spongiper
 
         # Nur DISBOARD-Nachrichten berücksichtigen
         if not message.author or message.author.id != DISBOARD_ID:
@@ -228,8 +228,8 @@ class Events(commands.Cog):
         if not message.embeds:
             return
         
-        # if message.guild.id != 1247839863408164868:
-        #     return
+        if message.guild.id != 1247839863408164868:
+            return
 
         for embed in message.embeds:
             text_to_check = []
@@ -249,7 +249,7 @@ class Events(commands.Cog):
             combined_text = " ".join(text_to_check)
 
             # Auf "bump erfolgreich" prüfen
-            if "general" in combined_text:
+            if "bump erfolgreich!" in combined_text:
 
                 # Datenbank updaten
                 db_guild = await self.client.get_guild(message.guild.id)
@@ -276,7 +276,7 @@ class Events(commands.Cog):
                     )
 
                 # Reminder planen (2 Stunden = 7200 Sekunden)
-                await self.schedule_reminder(1143997222107750563, 10)
+                await self.schedule_reminder()
                 break  # Kein doppeltes Triggern, wenn mehrere Felder passen
     
     async def schedule_reminder(self, guild: int=1247839863408164868, delay: int=7200):
