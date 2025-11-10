@@ -9,6 +9,7 @@ class VIP:
         648215020941082644, # ZS
         507517299746537472, # Juox
         1055981447183335444, # Nuna
+        1007372485609660426, # Adosa
     ]
     VIP_SERVER = [
         1030608164367913031, # Technikstube
@@ -59,6 +60,9 @@ ONLINE_PRESENCES = [
     discord.CustomActivity(name="Danke Juox"),
     discord.CustomActivity(name="Danke ZS"),
     discord.CustomActivity(name="Danke Adosa"),
+    discord.CustomActivity(name="Danke Duman"),
+    discord.CustomActivity(name="Adosa my beloved"),
+    discord.CustomActivity(name="Adosa Comeback"),
     discord.CustomActivity(name="Danke Nuna"),
     discord.CustomActivity(name="Danke Slangdraer"),
     discord.CustomActivity(name="Danke Keller"),
@@ -74,17 +78,19 @@ ONLINE_PRESENCES = [
     discord.Activity(type=discord.ActivityType.watching, name="Simplex"),
     discord.Activity(type=discord.ActivityType.watching, name="ZS"),
     discord.Activity(type=discord.ActivityType.watching, name="Adosa"),
+    discord.Activity(type=discord.ActivityType.watching, name="Duman"),
+    discord.Activity(type=discord.ActivityType.watching, name="Duman & Adosa"),
     discord.Activity(type=discord.ActivityType.watching, name="Nuna"),
     discord.Activity(type=discord.ActivityType.watching, name="Slangdraer"),
     discord.Activity(type=discord.ActivityType.watching, name="Spongebob Squarepants"),
     discord.Streaming(name="Technikstube", url="https://www.youtube.com/watch?v=d1YBv2mWll0"),
     discord.Streaming(name="Spongiper Incident", url="https://www.youtube.com/watch?v=qnIbmE5ggI4"),
     discord.Streaming(name="Der Keller", url="https://www.youtube.com/watch?v=ow5XgHDkPOQ"),
-    discord.Streaming(name="Die Stube", url="https://www.youtube.com/watch?v=0uksSl1Teek"),
     discord.Streaming(name="Geizhalshandschlag", url="https://www.youtube.com/watch?v=Mzv6ZsEj8HE")
 ]
 
 STARTUP_PRESENCES = [
+    discord.CustomActivity(name="Entbannt Adosa..."),
     discord.CustomActivity(name="Bereitet Krabbenbürger vor..."),
     discord.CustomActivity(name="Bereitet Patty vor..."),
     discord.CustomActivity(name="Erzeugt Existenzkrisen..."),
