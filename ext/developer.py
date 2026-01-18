@@ -55,7 +55,7 @@ class Developer(commands.Cog):
     @is_dev()
     @execute.command(name="leave", description="Let the bot leave a specific server")
     async def leave(self, interaction: discord.Interaction, id: str):
-        guild = self.bot.get_guild(id)
+        guild = await self.bot.get_guild(id)
         
         if guild is None:
             await interaction.response.send_message("Falsche ID UwU >_<", ephemeral=True)
