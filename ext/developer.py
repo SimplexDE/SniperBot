@@ -52,8 +52,36 @@ class Developer(commands.Cog):
         await chn.send(message)
         await interaction.response.send_message(">_<", ephemeral=True)
     
+    @is_dev()
+    @execute.command(name="leave", description="Let the bot leave a specific server")
+    async def leave(self, interaction: discord.Interaction, id: str):
+        guild = self.bot.get_guild(id)
+        
+        if guild is None:
+            await interaction.response.send_message("Falsche ID UwU >_<", ephemeral=True)
+            return
+        
+        await interaction.response.send_message("Bye Bye >_<", ephemeral=True)
+        await guild.system_channel.send("Bye Bye ¯\_(ツ)_/¯")
+        await guild.leave()
+        
+    @is_dev()
+    @execute.command(name="scuttle", description="Leave the current server immediately")
+    async def scuttle(self, interaction: discord.Interaction):
+        await interaction.response.send_message("Evacuating <:critical:1226665487988031508>", ephemeral=True)
+        await interaction.channel.send("Evacuating this server <:critical:1226665487988031508>")
+        await interaction.guild.leave()
+
     @say.error
     async def say_error(self, interaction: discord.Interaction, error: Exception):
+        await handle_error(interaction, error)
+        
+    @leave.error
+    async def leave_error(self, interaction: discord.Interaction, error: Exception):
+        await handle_error(interaction, error)
+        
+    @scuttle.error
+    async def scuttle_error(self, interaction: discord.Interaction, error: Exception):
         await handle_error(interaction, error)
     
     @block.error

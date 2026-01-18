@@ -5,16 +5,11 @@ class VIP:
     BOT = 862859543700176896
     VIPS = [
         579111799794958377, # Simplex
-        678671564396429322, # Songbird / Don
-        648215020941082644, # ZS
         507517299746537472, # Juox
-        1055981447183335444, # Nuna
-        1007372485609660426, # Adosa
     ]
     VIP_SERVER = [
         1030608164367913031, # Technikstube
         1143997222107750563, # Devnikstube
-        1247839863408164868, # DER KELLER
     ]
 
 class Emote:
@@ -53,18 +48,6 @@ ONLINE_PRESENCES = [
     discord.CustomActivity(name="Technikstube: .gg/eR23G266BS"),
     discord.CustomActivity(name="DER KELLER: .gg/3NER9SU3AH"),
     discord.CustomActivity(name="Schleswig-Holstein - Der echte Norden"),
-    discord.CustomActivity(name="Partei 77"),
-    discord.CustomActivity(name="Freie Discord User"),
-    discord.CustomActivity(name="Danke Simplex"),
-    discord.CustomActivity(name="Danke Don"),
-    discord.CustomActivity(name="Danke Juox"),
-    discord.CustomActivity(name="Danke ZS"),
-    discord.CustomActivity(name="Danke Adosa"),
-    discord.CustomActivity(name="Danke Duman"),
-    discord.CustomActivity(name="Adosa my beloved"),
-    discord.CustomActivity(name="Adosa Comeback"),
-    discord.CustomActivity(name="Danke Nuna"),
-    discord.CustomActivity(name="Danke Slangdraer"),
     discord.CustomActivity(name="Danke Keller"),
     discord.CustomActivity(name="Pfennichfuchsen!"),
     discord.CustomActivity(name="BILLIG BILLIG BILLIG"),
@@ -73,15 +56,7 @@ ONLINE_PRESENCES = [
     discord.Activity(type=discord.ActivityType.playing, name="Aale und Rolltreppen"),
     discord.Activity(type=discord.ActivityType.playing, name="mit dem Keller"),
     discord.Activity(type=discord.ActivityType.watching, name="norden.social/@simplex"),
-    discord.Activity(type=discord.ActivityType.watching, name="Don"),
-    discord.Activity(type=discord.ActivityType.watching, name="Juox"),
-    discord.Activity(type=discord.ActivityType.watching, name="Simplex"),
-    discord.Activity(type=discord.ActivityType.watching, name="ZS"),
-    discord.Activity(type=discord.ActivityType.watching, name="Adosa"),
-    discord.Activity(type=discord.ActivityType.watching, name="Duman"),
-    discord.Activity(type=discord.ActivityType.watching, name="Duman & Adosa"),
-    discord.Activity(type=discord.ActivityType.watching, name="Nuna"),
-    discord.Activity(type=discord.ActivityType.watching, name="Slangdraer"),
+    discord.Activity(type=discord.ActivityType.watching, name="troet.social/@technikstube"),
     discord.Activity(type=discord.ActivityType.watching, name="Spongebob Squarepants"),
     discord.Streaming(name="Technikstube", url="https://www.youtube.com/watch?v=d1YBv2mWll0"),
     discord.Streaming(name="Spongiper Incident", url="https://www.youtube.com/watch?v=qnIbmE5ggI4"),
@@ -90,7 +65,6 @@ ONLINE_PRESENCES = [
 ]
 
 STARTUP_PRESENCES = [
-    discord.CustomActivity(name="Entbannt Adosa..."),
     discord.CustomActivity(name="Bereitet Krabbenbürger vor..."),
     discord.CustomActivity(name="Bereitet Patty vor..."),
     discord.CustomActivity(name="Erzeugt Existenzkrisen..."),
