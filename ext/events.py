@@ -422,8 +422,12 @@ class Events(commands.Cog):
                 await message.reply("Ich konnte keinen Nutzer finden...")
                 return
             
-        await message.reply(silent=True, content=f"Ich wähle dich {the_choosen_one.mention}!")
-        await message.channel.send(silent=True, content="https://tenor.com/view/pokemon-poke-ball-ash-i-choose-you-gif-4444793")
+        if message.guild.id == 1247839863408164868:
+            file = discord.File("./images/MeisterKellerWaehltDich.png", "bild.png")
+            await message.reply(silent=True, content=f"Ich wähle dich {the_choosen_one.mention}!", file=file)
+        else:
+            await message.reply(silent=True, content=f"Ich wähle dich {the_choosen_one.mention}!")
+            await message.channel.send(silent=True, content="https://tenor.com/view/pokemon-poke-ball-ash-i-choose-you-gif-4444793")
     
     @commands.Cog.listener(name="on_guild_join")
     async def on_guild_join(self, guild: discord.Guild):
