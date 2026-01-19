@@ -62,7 +62,7 @@ class Developer(commands.Cog):
             return
         
         await interaction.response.send_message("Bye Bye >_<", ephemeral=True)
-        await guild.system_channel.send("Bye Bye ¯\_(ツ)_/¯")
+        await guild.system_channel.send("Bye Bye ¯\\_(ツ)_/¯")
         await guild.leave()
         
     @is_dev()

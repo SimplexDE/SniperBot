@@ -7,7 +7,7 @@ class PrefixCommands(commands.Cog):
     
     @commands.command(name="help")
     async def help_prefixcommand(self, context: commands.Context):
-        await context.reply("¯\_(ツ)_/¯")
+        await context.reply("¯\\_(ツ)_/¯")
     
 async def setup(bot):
     await bot.add_cog(PrefixCommands(bot))

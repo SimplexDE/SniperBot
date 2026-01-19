@@ -4,6 +4,8 @@ import os
 import pytz
 import datetime
 import asyncio
+import time
+import re
 from discord.ext import commands
 from util.antispam import Antispam
 from util.starboard import Starboard
@@ -385,6 +387,43 @@ class Events(commands.Cog):
             
             quote = await channel.send(embed=embed.BigEmbed(), allowed_mentions=None, file=attachment)
             await origin.edit(content=f"Zitat erstellt: {quote.jump_url}")
+            
+    @commands.Cog.listener(name="on_message")
+    async def someone(self, message: discord.Message):
+        
+        if message.author.bot \
+        or message.guild is None \
+        or message.author.id in self.blocklist \
+        or await Antispam().spamming(message):
+            return
+        
+        pattern = r'(@someone)'
+        
+        res = re.findall(pattern, message.content)
+        
+        if len(res) == 0:
+            return            
+        
+        members: list = message.guild.members
+        
+        pre: discord.Member = random.choice(members)
+        the_choosen_one = None
+        
+        i = 0
+        
+        while the_choosen_one is None:
+            if i > 0:
+                time.sleep(3)
+            if pre.bot:
+                pre = random.choice(members)
+                continue
+            the_choosen_one = pre
+            if i > 8:
+                await message.reply("Ich konnte keinen Nutzer finden...")
+                return
+            
+        await message.reply(silent=True, content=f"Ich wähle dich {the_choosen_one.mention}!")
+        await message.channel.send(silent=True, content="https://tenor.com/view/pokemon-poke-ball-ash-i-choose-you-gif-4444793")
     
     @commands.Cog.listener(name="on_guild_join")
     async def on_guild_join(self, guild: discord.Guild):

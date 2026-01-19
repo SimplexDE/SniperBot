@@ -1,4 +1,6 @@
 import discord
+import random
+import time
 from discord.ext import commands
 from discord import app_commands
 
@@ -24,6 +26,10 @@ class Commands(commands.Cog):
                                 allowed_installs=app_commands.AppInstallationType(guild=True, user=False), default_permissions=perms)
     
     quote = app_commands.Group(name="quote", description="Manage the guilds Quote Settings", 
+                                allowed_contexts=(app_commands.AppCommandContext(guild=True, dm_channel=False, private_channel=True)),
+                                allowed_installs=app_commands.AppInstallationType(guild=True, user=False), default_permissions=perms)
+    
+    randomG = app_commands.Group(name="random", description="A list of things that generate random stuff", 
                                 allowed_contexts=(app_commands.AppCommandContext(guild=True, dm_channel=False, private_channel=True)),
                                 allowed_installs=app_commands.AppInstallationType(guild=True, user=False), default_permissions=perms)
     
@@ -109,6 +115,36 @@ class Commands(commands.Cog):
         )
         
         await interaction.response.send_message(embed=embed.StandardEmbed(), view=NukeConfirmView(self.bot, interaction.user, chan))
+        
+    @randomG.command(name="user", description="Picks a random user of the current guild")
+    async def random(self, interaction: discord.Interaction):
+
+        members: list = interaction.guild.members
+        
+        pre: discord.Member = random.choice(members)
+        the_choosen_one = None
+        
+        i = 0
+        
+        while the_choosen_one is None:
+            if i > 0:
+                time.sleep(3)
+            if pre.bot:
+                pre = random.choice(members)
+                continue
+            the_choosen_one = pre
+            if i > 8:
+                await interaction.response.send_message("Ich konnte keinen Nutzer finden...")
+                return
+            
+
+        embed = Embed(
+            title="Random | Member-Selector",
+            description=f"Ich wähle {the_choosen_one.mention}!",
+            color=discord.Color.green(),
+        )
+        
+        await interaction.response.send_message(embed=embed.StandardEmbed())
 
     @starboard.command(name="unset", description="Disable the Starboard")
     async def starboard_unset(self, interaction: discord.Interaction):
