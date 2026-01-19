@@ -13,6 +13,9 @@ ATTACHMENTS_SRC = "./attachments"
 
 blocklist = []
 
+def get_blocklist():
+    return blocklist
+
 class Developer(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot

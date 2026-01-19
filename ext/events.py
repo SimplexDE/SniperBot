@@ -15,7 +15,7 @@ from stats.client import MESSAGES_SNIPED
 from util.quote import Quote
 from util.embed import Embed
 from util.logger import log
-from ext.developer import blocklist
+from ext.developer import get_blocklist
 from util.constants import COLORS, ATTACHMENTS_SRC, Emote
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
@@ -28,7 +28,7 @@ class Events(commands.Cog):
         self.last_message = {}
         self.last_sent_from_bot = {}
         self.last_sent = {}
-        self.blocklist = blocklist
+        self.blocklist = get_blocklist()
         self.scheduled = False
         
     @commands.Cog.listener(name="on_message")
