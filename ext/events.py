@@ -28,7 +28,6 @@ class Events(commands.Cog):
         self.last_message = {}
         self.last_sent_from_bot = {}
         self.last_sent = {}
-        self.blocklist = get_blocklist()
         self.scheduled = False
         
     @commands.Cog.listener(name="on_message")
@@ -37,7 +36,7 @@ class Events(commands.Cog):
         
         if message.author.bot \
         or message.guild is None \
-        or message.author.id in self.blocklist \
+        or message.author.id in get_blocklist() \
         or content[0] != "s" \
         or len(message.content) != 1:
             return
@@ -393,7 +392,7 @@ class Events(commands.Cog):
         
         if message.author.bot \
         or message.guild is None \
-        or message.author.id in self.blocklist \
+        or message.author.id in get_blocklist() \
         or await Antispam().spamming(message):
             return
         
