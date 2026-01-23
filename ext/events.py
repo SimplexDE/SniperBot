@@ -37,8 +37,10 @@ class Events(commands.Cog):
         if message.author.bot \
         or message.guild is None \
         or message.author.id in get_blocklist() \
-        or content[0] != "s" \
         or len(message.content) != 1:
+            return
+        
+        if content[0] != "s":
             return
         
         if not self.last_message.get(message.guild.id):
