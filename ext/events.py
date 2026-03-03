@@ -268,14 +268,12 @@ class Events(commands.Cog):
 
                 if user:
                     await message.channel.send(
-                        f"Danke fürs Bumpen {user.mention}! "
-                        f"Ich werde dich in 2 Stunden wieder erinnern!\n\n"
-                        "-# Exklusives Feature für den Server `[DER KELLER]`"
+                        f"Vielen Dank für das Bumpen unseres Kellers, {user.mention}! "
+                        f"Ich werde in zwei Stunden wieder daran erinnern!"
                     )
                 else:
                     await message.channel.send(
-                        "Danke fürs Bumpen! Ich werde dich in 2 Stunden wieder erinnern!\n\n"
-                        "-# Exklusives Feature für den Server `[DER KELLER]`"
+                        "Vielen Dank für das Bumpen unseres Kellers! Ich werde in 2 Stunden wieder daran erinnern!"
                     )
 
                 # Reminder planen (2 Stunden = 7200 Sekunden)
@@ -315,7 +313,7 @@ class Events(commands.Cog):
 
         print(f"reminder scheduled ({remaining})")
         await asyncio.sleep(remaining)
-        await channel.send("Es ist Zeit zu Bumpen, Kellerfreunde!\n<@&1271932301885968484>")
+        await channel.send("Zwei Stunden sind vorbei! Zeit zu `/bump`en, Kellerfreunde!\n<@&1271932301885968484>")
         self.scheduled = False
     
     @commands.Cog.listener(name="on_message")
