@@ -1,5 +1,7 @@
 # SniperBot (Spongiper)
 
+[![Build Status](https://cicd.smplx.it/api/badges/Simplex/SniperBot/status.svg)](https://cicd.smplx.it/Simplex/SniperBot)
+
 We all know the moment when someone deletes a message and you couldn't quite read it.
 That Moment now ends, with SPONGIPER you can Recover the last deleted message in any channel!
 
