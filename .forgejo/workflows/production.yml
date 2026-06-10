@@ -1,0 +1,117 @@
+name: production
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Konkrete Version (z.B. 2.0.0)'
+        required: false
+        type: string
+
+env:
+  APP_NAME: spongiper
+  REPO_NAME: Sniperbot
+  REGISTRY: 192.168.2.10:5000
+  DOCKER_HOST: tcp://192.168.2.100:2375
+
+jobs:
+  build:
+    runs-on: [self-hosted]
+    container:
+      image: docker:cli
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+
+    steps:
+      - name: Install dependencies
+        run: apk add --no-cache git
+
+      - name: Clone repository
+        env:
+          USER: ${{ secrets.GIT_USER }}
+          PASS: ${{ secrets.GIT_PASS }}
+        run: git clone -b main https://$USER:$PASS@git.smplx.it/simplex/${{ env.REPO_NAME }}.git ./${{ env.REPO_NAME }}
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            cd ./${{ env.REPO_NAME }}
+            COMMIT_MSG=$(git log -1 --pretty=%s)
+            if echo "$COMMIT_MSG" | grep -qE '^.+!:|BREAKING CHANGE'; then
+              BUMP="major"
+            elif echo "$COMMIT_MSG" | grep -qE '^feat'; then
+              BUMP="minor"
+            else
+              BUMP="patch"
+            fi
+
+            LAST_TAG=$(git tag --sort=-v:refname | grep '^v' | head -n1)
+            if [ -z "$LAST_TAG" ]; then
+              VERSION="0.1.0"
+            else
+              MAJOR=$(echo $LAST_TAG | sed 's/v//' | cut -d. -f1)
+              MINOR=$(echo $LAST_TAG | sed 's/v//' | cut -d. -f2)
+              PATCH=$(echo $LAST_TAG | sed 's/v//' | cut -d. -f3)
+              case "$BUMP" in
+                major) VERSION="$((MAJOR + 1)).0.0" ;;
+                minor) VERSION="$MAJOR.$((MINOR + 1)).0" ;;
+                *)     VERSION="$MAJOR.$MINOR.$((PATCH + 1))" ;;
+              esac
+            fi
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Tag version
+        if: github.event_name != 'pull_request'
+        run: |
+          cd ./${{ env.REPO_NAME }}
+          git config user.name  "forgejo-actions[bot]"
+          git config user.email "forgejo-actions[bot]@users.noreply.git.smplx.it"
+          git tag "v${{ steps.version.outputs.VERSION }}"
+          git push origin "v${{ steps.version.outputs.VERSION }}"
+
+      - name: Build and push Docker image
+        if: github.event_name != 'pull_request'
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          docker build -t ${{ env.APP_NAME }}:$VERSION ./${{ env.REPO_NAME }}
+          docker tag ${{ env.APP_NAME }}:$VERSION ${{ env.REGISTRY }}/${{ env.APP_NAME }}:$VERSION
+          docker tag ${{ env.APP_NAME }}:$VERSION ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.APP_NAME }}:$VERSION
+          docker push ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: [self-hosted]
+    container:
+      image: docker:cli
+
+    steps:
+      - name: Remove existing container
+        continue-on-error: true
+        run: |
+          docker stop ${{ env.APP_NAME }}
+          docker rm ${{ env.APP_NAME }}
+
+      - name: Deploy container
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          docker run -d \
+            --name ${{ env.APP_NAME }} \
+            --restart "unless-stopped" \
+            --network bridge \
+            -e TOKEN="$TOKEN" \
+            -e DATABASE_NAME="${{ env.APP_NAME }}" \
+            -e VERSION="$VERSION" \
+            ${{ env.REGISTRY }}/${{ env.APP_NAME }}:$VERSION
