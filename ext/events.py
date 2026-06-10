@@ -29,6 +29,30 @@ class Events(commands.Cog):
         self.last_sent_from_bot = {}
         self.last_sent = {}
         self.scheduled = False
+    
+    @commands.Cog.listener(name="on_member_update")
+    async def anti_nick(self, before: discord.Member, after: discord.Member):
+        if before.guild.id != 1247839863408164868:
+            return
+        if before.id == 579111799794958377:
+            if after.nick != "Simplex":
+                after.edit(nick=None)
+    
+    @commands.Cog.listener(name="on_message")
+    async def laura_message(self, message: discord.Message):
+        if message.author.bot:
+            return
+
+        content = message.content.lower()
+
+        laura_count = len(re.findall(r'\blaura\b', content))
+        aura_count = len(re.findall(r'\baura\b', content))
+
+        if laura_count > 0:
+            await message.reply(" ".join(["Aura"] * laura_count))
+
+        if aura_count > 0:
+            await message.reply(" ".join(["Laura"] * aura_count))
         
     @commands.Cog.listener(name="on_message")
     async def snipe(self, message: discord.Message):
