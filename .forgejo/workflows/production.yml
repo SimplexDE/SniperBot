@@ -32,13 +32,8 @@ jobs:
 
       - name: Build and push Docker image
         if: github.event_name != 'pull_request'
-        env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
-          docker build -t ${{ env.APP_NAME }}:$VERSION ./${{ env.REPO_NAME }}
-          docker tag ${{ env.APP_NAME }}:$VERSION ${{ env.REGISTRY }}/${{ env.APP_NAME }}:$VERSION
-          docker tag ${{ env.APP_NAME }}:$VERSION ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
-          docker push ${{ env.REGISTRY }}/${{ env.APP_NAME }}:$VERSION
+          docker build -t ${{ env.APP_NAME }}:latest ./${{ env.REPO_NAME }}
           docker push ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
 
   deploy:
@@ -58,7 +53,6 @@ jobs:
       - name: Deploy container
         env:
           TOKEN: ${{ secrets.TOKEN }}
-          VERSION: ${{ needs.build.outputs.version }}
         run: |
           docker run -d \
             --name ${{ env.APP_NAME }} \
@@ -66,5 +60,4 @@ jobs:
             --network bridge \
             -e TOKEN="$TOKEN" \
             -e DATABASE_NAME="${{ env.APP_NAME }}" \
-            -e VERSION="$VERSION" \
-            ${{ env.REGISTRY }}/${{ env.APP_NAME }}:$VERSION
+            ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
