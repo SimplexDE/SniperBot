@@ -2,9 +2,8 @@ name: production
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches: [master]
+  workflow_dispatch
 
 env:
   APP_NAME: spongiper
