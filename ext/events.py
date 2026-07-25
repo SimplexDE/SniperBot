@@ -30,6 +30,11 @@ class Events(commands.Cog):
         self.last_sent = {}
         self.scheduled = False
     
+    @commands.Cog.listener(name="on_message")
+    async def horse(self, message: discord.Message):
+        if random.random() < (3.14 / 100):
+            await message.channel.send("Horse")
+    
     @commands.Cog.listener(name="on_member_update")
     async def anti_nick(self, before: discord.Member, after: discord.Member):
         if before.guild.id != 1247839863408164868:
