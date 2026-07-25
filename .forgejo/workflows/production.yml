@@ -5,12 +5,6 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Konkrete Version (z.B. 2.0.0)'
-        required: false
-        type: string
 
 env:
   APP_NAME: spongiper
@@ -35,47 +29,6 @@ jobs:
           USER: ${{ secrets.GIT_USER }}
           PASS: ${{ secrets.GIT_PASS }}
         run: git clone -b master https://$USER:$PASS@git.smplx.it/simplex/${{ env.REPO_NAME }}.git ./${{ env.REPO_NAME }}
-
-      - name: Determine version
-        id: version
-        run: |
-          if [ -n "${{ inputs.version }}" ]; then
-            VERSION="${{ inputs.version }}"
-          else
-            cd ./${{ env.REPO_NAME }}
-            COMMIT_MSG=$(git log -1 --pretty=%s)
-            if echo "$COMMIT_MSG" | grep -qE '^.+!:|BREAKING CHANGE'; then
-              BUMP="major"
-            elif echo "$COMMIT_MSG" | grep -qE '^feat'; then
-              BUMP="minor"
-            else
-              BUMP="patch"
-            fi
-
-            LAST_TAG=$(git tag --sort=-v:refname | grep '^v' | head -n1)
-            if [ -z "$LAST_TAG" ]; then
-              VERSION="0.1.0"
-            else
-              MAJOR=$(echo $LAST_TAG | sed 's/v//' | cut -d. -f1)
-              MINOR=$(echo $LAST_TAG | sed 's/v//' | cut -d. -f2)
-              PATCH=$(echo $LAST_TAG | sed 's/v//' | cut -d. -f3)
-              case "$BUMP" in
-                major) VERSION="$((MAJOR + 1)).0.0" ;;
-                minor) VERSION="$MAJOR.$((MINOR + 1)).0" ;;
-                *)     VERSION="$MAJOR.$MINOR.$((PATCH + 1))" ;;
-              esac
-            fi
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Tag version
-        if: github.event_name != 'pull_request'
-        run: |
-          cd ./${{ env.REPO_NAME }}
-          git config user.name  "forgejo-actions[bot]"
-          git config user.email "forgejo-actions[bot]@users.noreply.git.smplx.it"
-          git tag "v${{ steps.version.outputs.VERSION }}"
-          git push origin "v${{ steps.version.outputs.VERSION }}"
 
       - name: Build and push Docker image
         if: github.event_name != 'pull_request'
