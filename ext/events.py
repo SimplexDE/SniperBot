@@ -40,8 +40,7 @@ class Events(commands.Cog):
         if before.guild.id != 1247839863408164868:
             return
         if before.id == 579111799794958377:
-            if after.nick != "Simplex":
-                await after.edit(nick=None)
+            await after.edit(nick=None)
     
     @commands.Cog.listener(name="on_message")
     async def laura_message(self, message: discord.Message):
