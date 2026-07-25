@@ -39,8 +39,11 @@ class Events(commands.Cog):
     async def anti_nick(self, before: discord.Member, after: discord.Member):
         if before.guild.id != 1247839863408164868:
             return
-        if before.id == 579111799794958377:
-            await after.edit(nick=None)
+        if before.id != 579111799794958377:
+            return
+        if after.nick is None:
+            return
+        await after.edit(nick=None)
     
     @commands.Cog.listener(name="on_message")
     async def laura_message(self, message: discord.Message):
