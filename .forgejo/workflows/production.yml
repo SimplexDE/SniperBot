@@ -34,6 +34,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           docker build -t ${{ env.APP_NAME }}:latest ./${{ env.REPO_NAME }}
+          docker tag ${{ env.APP_NAME }}:latest ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
           docker push ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
 
   deploy:
