@@ -10,6 +10,7 @@ env:
   REPO_NAME: Sniperbot
   REGISTRY: 192.168.2.10:5000
   DOCKER_HOST: tcp://192.168.2.100:2375
+  VERSION: latest
 
 jobs:
   build:
