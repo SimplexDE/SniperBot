@@ -34,7 +34,7 @@ jobs:
         env:
           USER: ${{ secrets.GIT_USER }}
           PASS: ${{ secrets.GIT_PASS }}
-        run: git clone -b main https://$USER:$PASS@git.smplx.it/simplex/${{ env.REPO_NAME }}.git ./${{ env.REPO_NAME }}
+        run: git clone -b master https://$USER:$PASS@git.smplx.it/simplex/${{ env.REPO_NAME }}.git ./${{ env.REPO_NAME }}
 
       - name: Determine version
         id: version
