@@ -41,9 +41,23 @@ class Events(commands.Cog):
             return
         if before.id != 579111799794958377:
             return
+        if before.nick == after.nick:
+            return
         if after.nick is None:
             return
-        await after.edit(nick=None)
+
+        beforeNick = before.nick
+
+        async for entry in after.guild.audit_logs(
+            action=discord.AuditLogAction.member_update, limit=5
+        ):
+            if entry.target.id != after.id:
+                continue
+            if entry.user.id == 579111799794958377 or entry.user.bot:
+                return
+            break
+
+        await after.edit(nick=beforeNick)
     
     @commands.Cog.listener(name="on_message")
     async def laura_message(self, message: discord.Message):
