@@ -58,7 +58,7 @@ shellingham==1.5.4
 tomlkit==0.14.0
 trove-classifiers==2026.1.14.14
 Unidecode==1.4.0
-urllib3==2.6.3
+urllib3==2.7.0
 virtualenv==21.2.4
 yarl==1.24.5
 zstandard==0.25.0
