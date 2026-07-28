@@ -4,3 +4,4 @@
 /attachments
 .vscode/
 images/out/
+*.db
