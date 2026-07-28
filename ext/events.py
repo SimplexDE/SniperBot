@@ -6,6 +6,7 @@ import datetime
 import asyncio
 import time
 import re
+import secrets
 from discord.ext import commands
 from util.antispam import Antispam
 from util.starboard import Starboard
@@ -32,7 +33,7 @@ class Events(commands.Cog):
     
     @commands.Cog.listener(name="on_message")
     async def horse(self, message: discord.Message):
-        if random.random() < (3.14 / 100):
+        if secrets.randbelow(10000) < 314:
             await message.channel.send("Horse")
     
     @commands.Cog.listener(name="on_member_update")
