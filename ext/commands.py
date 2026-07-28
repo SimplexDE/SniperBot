@@ -296,7 +296,7 @@ class Commands(commands.Cog):
 
     @about.error
     async def about_error(self, interaction: discord.Interaction, error: Exception):
-        handle_error(interaction, error)
+        await handle_error(interaction, error)
 
     @nuke.error
     async def nuke_error(self, interaction: discord.Interaction, error: Exception):
