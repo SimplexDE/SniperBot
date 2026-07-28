@@ -33,7 +33,7 @@ keyring==25.7.0
 loguru==0.7.3
 loki-logger-handler==1.1.2
 more-itertools==10.8.0
-msgpack==1.1.2
+msgpack==1.2.1
 multidict==6.7.1
 pbs-installer==2026.2.11
 pillow==12.3.0
