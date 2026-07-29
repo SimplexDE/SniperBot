@@ -33,8 +33,14 @@ class Events(commands.Cog):
     
     @commands.Cog.listener(name="on_message")
     async def horse(self, message: discord.Message):
-        if secrets.randbelow(10000) < 314:
-            await message.channel.send("Horse")
+        
+        if message.author.bot:
+            return
+        
+        if secrets.randbelow(10000) < 20:
+            keywords = ["Horse", "Tomate"]
+            
+            await message.channel.send(random.choice(keywords))
     
     @commands.Cog.listener(name="on_member_update")
     async def anti_nick(self, before: discord.Member, after: discord.Member):
