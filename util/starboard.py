@@ -13,7 +13,7 @@ class Starboard:
     def __init__(self, bot):
         self.bot: commands.Bot = bot
         self.tz: timezone = timezone("Europe/Berlin")
-        self.client: SpongiperClient() = SpongiperClient(bot)
+        self.client: SpongiperClient = SpongiperClient(bot)
         self.guild_locks: dict[int, asyncio.Lock] = {}
     
     def _get_random_color(self) -> discord.Colour:
@@ -101,8 +101,8 @@ class Starboard:
             settings = db_guild.settings
             
             try:
-                message = await starboard.fetch_message(int(settings["starredMessages"][str(message.id)]["message_id"]))
-                await message.edit(embed=self._get_embed(message, stars))
+                board_message = await starboard.fetch_message(int(settings["starredMessages"][str(message.id)]["starMessage_id"]))
+                await board_message.edit(embed=self._get_embed(message, stars))
             except discord.NotFound:
                 await self._add_to_board(starboard, message, stars)
             except KeyError:
