@@ -13,7 +13,7 @@ class Embed:
                 description: str = "",
                 footer: str = "",
                 footer_icon_url: str = "",
-                fields: list[tuple] = [],
+                fields: list[tuple] = None,
                 image_url: str = "",
                 color: Union[int, discord.Colour] = discord.Color.light_gray(),
                 timestamp: datetime.datetime = datetime.datetime.now()
@@ -25,7 +25,7 @@ class Embed:
         self.title_url = title_url
         self.footer = footer
         self.title_icon_url = title_icon_url
-        self.fields = fields
+        self.fields = fields if fields is not None else []
         self.timestamp = timestamp
         self.footer_icon_url = footer_icon_url
         self.image_url = image_url

@@ -8,8 +8,8 @@ from dotenv import get_key
 from discord.ext import commands, tasks
 
 from util.logger import log
-from util.embed import Embed
 from util.constants import ONLINE_PRESENCES, STARTUP_PRESENCES
+from database.message_history import MessageHistory
 
 from stats.client import BOT_STATUS, SERVER_COUNT
 
@@ -20,6 +20,9 @@ intents.message_content = True
 paths = [
     "ext/"
 ]
+
+HISTORY_BACKFILL_LIMIT = 10
+HISTORY_BACKFILL_CONCURRENCY = 5
 
 class Sniper(commands.Bot):
     def __init__(self):
@@ -42,6 +45,15 @@ class Sniper(commands.Bot):
                     extensions.append(f"{path.replace("/", ".")}{file[:-3]}")
                     
         return extensions
+
+    @staticmethod
+    async def _backfill_channel_history(channel, history: MessageHistory, semaphore: asyncio.Semaphore):
+        async with semaphore:
+            try:
+                async for message in channel.history(limit=HISTORY_BACKFILL_LIMIT):
+                    history.remember(message)
+            except (discord.Forbidden, discord.HTTPException):
+                pass
 
     @tasks.loop(minutes=30)
     async def cleanup(self):
@@ -78,6 +90,7 @@ class Sniper(commands.Bot):
         log.debug("Starting Cleanup Task...")
         BOT_STATUS.state("starting")
         self.cleanup.start()
+        MessageHistory().ensure_index()
     
     async def on_connect(self):
         log.debug("Setting Presence to Startup Presence...")
@@ -90,48 +103,24 @@ class Sniper(commands.Bot):
         log.trace("Loading Extensions...")
         for extension in self._get_extenstions():
             await self.load_extension(extension)
-        
-        # TODO: Make this its own function / separate out into a file ----------------------------------------
-        log.debug("Grabbing Channel Text Histories...")
-        log_channel = self.get_channel(int(1325196683776229410))
-        _guilds = self.guilds
-        text_channels_count = 0
-        for guild in _guilds:
-            for channel in guild.channels:
-                if channel.type == discord.ChannelType.text:
-                    text_channels_count += 1
-        text_channels_retrieved = 0
-        guilds_count = len(_guilds)
-        SERVER_COUNT.set(guilds_count)
-        guilds_retrieved = 0
-        msgs = 0
-        
-        for guild in _guilds:
-            for channel in guild.channels:
-                if channel.type == discord.ChannelType.text:
-                    if not self.message_cache.get(channel.id):
-                        self.message_cache[channel.id] = []
-                    try:
-                        self.message_cache[channel.id] = [message async for message in channel.history(limit=100)]
-                    except Exception:
-                        continue
-                    msgs += len(self.message_cache[channel.id])
-                    text_channels_retrieved += 1
-            guilds_retrieved += 1
-            
-        log.debug("Grabbed all Text Histories...")
-        # --------------------------------------------------------------------------------------------------------------------------
-            
-        embed = Embed(
-            title="History-Grabber",
-            description= \
-                f"Guilds retrieved: `{guilds_retrieved}/{guilds_count} -|- {round(guilds_retrieved / guilds_count * 100)}%`" +
-                f"\nChannels retrieved: `{text_channels_retrieved}/{text_channels_count} -|- {round(text_channels_retrieved / text_channels_count * 100)}%`" + 
-                f"\nMessages collected: **`{msgs}`**"
-        )
-                
-        await log_channel.send(embed=embed.StandardEmbed())
-    
+
+        SERVER_COUNT.set(len(self.guilds))
+
+        log.debug("Backfilling recent channel history...")
+        history = MessageHistory()
+        semaphore = asyncio.Semaphore(HISTORY_BACKFILL_CONCURRENCY)
+        text_channels = [
+            channel
+            for guild in self.guilds
+            for channel in guild.channels
+            if channel.type == discord.ChannelType.text
+        ]
+        await asyncio.gather(*(
+            self._backfill_channel_history(channel, history, semaphore)
+            for channel in text_channels
+        ))
+        log.debug(f"Backfilled history for {len(text_channels)} channels")
+
         sync = await self.tree.sync()
         log.info(f"Synced {len(sync)} commands")
     

@@ -2,10 +2,19 @@ from typing import List
 
 from pymongo import MongoClient
 
+_client: MongoClient = None
+
+
+def _get_client() -> MongoClient:
+    global _client
+    if _client is None:
+        _client = MongoClient("mongodb://192.168.2.10:27017")
+    return _client
+
 
 class MongoDB:
     def __init__(self, database: str):
-        self.client: MongoClient = MongoClient("mongodb://192.168.2.10:27017")
+        self.client: MongoClient = _get_client()
         self.database = self.client[database]
 
     def connection(self):

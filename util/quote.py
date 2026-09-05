@@ -3,11 +3,29 @@ import os
 import textwrap
 import re
 import asyncio
+from functools import lru_cache
 from unidecode import unidecode
 
 from PIL import ImageFont, Image, ImageDraw
 
 from util.constants import FONTS_SRC, IMAGES_SRC
+
+MENTION_PATTERN = re.compile(r"<(@|#|@&?)(\d+)>")
+
+
+@lru_cache(maxsize=1)
+def _load_fonts():
+    return (
+        ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=24),
+        ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=18),
+        ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=12),
+    )
+
+
+@lru_cache(maxsize=1)
+def _load_mask():
+    return Image.open(f"{IMAGES_SRC}/mask.png")
+
 
 class Quote:
     def __init__(self, *, message: discord.Message):
@@ -17,9 +35,8 @@ class Quote:
     def _truncate_text(self, text, max_chars=100, suffix="..."):
         return text[:max_chars] + suffix if len(text) > max_chars else text
     
-    def _replace_mentions(self, text: str, guild: discord.Guild):        
-        pattern = "<(@|#|@&?)(\\d+)>"
-        mentions = re.findall(pattern, text)
+    def _replace_mentions(self, text: str, guild: discord.Guild):
+        mentions = MENTION_PATTERN.findall(text)
         
         for mention in mentions:
             match (mention[0]):
@@ -60,11 +77,9 @@ class Quote:
             AVATAR_SIZE = (256, 256)
             BACKGROUND_SIZE = (256*2, 256)
 
-            FONT_LARGE = ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=24)
-            FONT_SMALL = ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=18)
-            FONT_XSMALL = ImageFont.truetype(font=f"{FONTS_SRC}/arial.ttf", size=12)
+            FONT_LARGE, FONT_SMALL, FONT_XSMALL = _load_fonts()
 
-            mask = Image.open(f"{IMAGES_SRC}/mask.png")
+            mask = _load_mask()
             background = Image.new("RGBA", BACKGROUND_SIZE, color=(0,0,0))
             avatar_image = Image.open(avatar_path).resize(AVATAR_SIZE)
             background.paste(avatar_image, mask=mask.convert("L").resize(AVATAR_SIZE))

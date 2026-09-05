@@ -17,14 +17,11 @@ class Antispam:
             
         self.antispam_guilds = cache["guilds"]
     
-    def _add_point(self, guild_id, points: int=1):
-        if not self.antispam_guilds.get(guild_id):
-            self.antispam_guilds[guild_id] = {
-                "last_message": datetime.now(),
-                "messages": 0,
-            }
-        
-        antispam_guild = self.antispam_guilds[guild_id]
+    def _add_point(self, guild_id):
+        antispam_guild = self.antispam_guilds.setdefault(guild_id, {
+            "last_message": datetime.now(),
+            "messages": 0,
+        })
         last_message = antispam_guild["last_message"]
         messages = antispam_guild["messages"]
 
@@ -35,8 +32,8 @@ class Antispam:
             self.BLOCK_COMMANDS = False
             del cache["guilds"][guild_id]
             return
-        
-        self.antispam_guilds[guild_id]["last_message"] = datetime.now()
+
+        antispam_guild["last_message"] = datetime.now()
         antispam_guild["messages"] += 1
     
     async def spamming(self, message: discord.Message) -> bool:

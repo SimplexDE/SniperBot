@@ -8,9 +8,6 @@ from util.checks import is_dev
 from util.errorhandling import handle_error
 from util.logger import log
 
-image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
-ATTACHMENTS_SRC = "./attachments"
-
 blocklist = []
 
 def get_blocklist():
@@ -22,27 +19,27 @@ class Developer(commands.Cog):
     
     execute = app_commands.Group(name="sudo", description="Developer Commands", 
                                 allowed_contexts=(app_commands.AppCommandContext(guild=True, dm_channel=False, private_channel=True)),
-                                allowed_installs=app_commands.AppInstallationType(guild=False, user=True))
+                                allowed_installs=app_commands.AppInstallationType(guild=True, user=True))
     
     @is_dev()
     @execute.command(name="block", description="Block a User")
     async def block(self, interaction: discord.Interaction, member: discord.Member):
-        if blocklist.count(member.id) != 0:
+        if member.id in blocklist:
             await interaction.response.send_message(f"> {member.name} is now blocked.", allowed_mentions=None, ephemeral=True)
             return
-        
+
         blocklist.append(member.id)
         await interaction.response.send_message(f"> {member.name} is now blocked.", allowed_mentions=None, ephemeral=True)
 
     @is_dev()
     @execute.command(name="unblock", description="Unblock a User")
-    async def unblock(self, interaction: discord.Interaction, member: discord.Member):        
-        if blocklist.count(member.id) == 0:
+    async def unblock(self, interaction: discord.Interaction, member: discord.Member):
+        if member.id not in blocklist:
             await interaction.response.send_message(f"> {member.name} is unblocked.", allowed_mentions=None, ephemeral=True)
             return
-        
-        blocklist.pop(blocklist.index(member.id))
-        
+
+        blocklist.remove(member.id)
+
         await interaction.response.send_message(f"{member.name} is unblocked.", allowed_mentions=None, ephemeral=True)
 
     @is_dev()

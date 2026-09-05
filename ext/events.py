@@ -4,13 +4,14 @@ import os
 import pytz
 import datetime
 import asyncio
-import time
 import re
 import secrets
+from types import SimpleNamespace
 from discord.ext import commands
 from util.antispam import Antispam
 from util.starboard import Starboard
 from database.mongoclient import SpongiperClient
+from database.message_history import MessageHistory
 
 from stats.client import MESSAGES_SNIPED
 from util.quote import Quote
@@ -21,16 +22,28 @@ from util.constants import COLORS, ATTACHMENTS_SRC, Emote
 
 image_exts = [".jpg", ".png", ".jpeg", ".webp", ".gif"]
 
+LAURA_PATTERN = re.compile(r'\blaura\b')
+AURA_PATTERN = re.compile(r'\baura\b')
+SOMEONE_PATTERN = re.compile(r'(@someone)')
+
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.starboard: Starboard = Starboard(bot)
         self.client: SpongiperClient = SpongiperClient(bot)
+        self.message_history: MessageHistory = MessageHistory()
         self.last_message = {}
         self.last_sent_from_bot = {}
         self.last_sent = {}
         self.scheduled = False
-    
+
+    @commands.Cog.listener(name="on_message")
+    async def remember_message(self, message: discord.Message):
+        if message.author.id == self.bot.user.id or message.guild is None:
+            return
+
+        self.message_history.remember(message)
+
     @commands.Cog.listener(name="on_message")
     async def horse(self, message: discord.Message):
         
@@ -73,8 +86,8 @@ class Events(commands.Cog):
 
         content = message.content.lower()
 
-        laura_count = len(re.findall(r'\blaura\b', content))
-        aura_count = len(re.findall(r'\baura\b', content))
+        laura_count = len(LAURA_PATTERN.findall(content))
+        aura_count = len(AURA_PATTERN.findall(content))
 
         if laura_count > 0:
             await message.reply(" ".join(["Aura"] * laura_count))
@@ -94,180 +107,183 @@ class Events(commands.Cog):
         
         if content[0] != "s":
             return
-        
-        if not self.last_message.get(message.guild.id):
-            self.last_message[message.guild.id] = {}
-        
-        if self.last_message[message.guild.id] is None:
+
+        guild_id = message.guild.id
+        channel_id = message.channel.id
+
+        if not self.last_message.get(guild_id):
+            self.last_message[guild_id] = {}
+
+        if self.last_message[guild_id] is None:
             return
-        
-        if not self.last_message[message.guild.id].get(message.channel.id):
-            self.last_message[message.guild.id][message.channel.id] = None
-        
-        if self.last_message[message.guild.id][message.channel.id] is None:
+
+        if not self.last_message[guild_id].get(channel_id):
+            self.last_message[guild_id][channel_id] = None
+
+        last = self.last_message[guild_id][channel_id]
+
+        if last is None:
             return
-        
+
         if await Antispam().spamming(message):
             return
-        
+
         reuse = False
-        
-        if not self.last_sent.get(message.guild.id):
-            self.last_sent[message.guild.id] = {}
-            
-        if not self.last_sent[message.guild.id].get(message.channel.id):
-            self.last_sent[message.guild.id][message.channel.id] = None
-            
-        if not self.last_sent_from_bot.get(message.guild.id):
-            self.last_sent_from_bot[message.guild.id] = {}
-            
-        if not self.last_sent_from_bot[message.guild.id].get(message.channel.id):
-            self.last_sent_from_bot[message.guild.id][message.channel.id] = None
-            
-        if self.last_message[message.guild.id][message.channel.id] == self.last_sent[message.guild.id][message.channel.id]:
+
+        if not self.last_sent.get(guild_id):
+            self.last_sent[guild_id] = {}
+
+        if not self.last_sent[guild_id].get(channel_id):
+            self.last_sent[guild_id][channel_id] = None
+
+        if not self.last_sent_from_bot.get(guild_id):
+            self.last_sent_from_bot[guild_id] = {}
+
+        if not self.last_sent_from_bot[guild_id].get(channel_id):
+            self.last_sent_from_bot[guild_id][channel_id] = None
+
+        if last == self.last_sent[guild_id][channel_id]:
             reuse = True
-        self.last_sent[message.guild.id][message.channel.id] = self.last_message[message.guild.id][message.channel.id]
-        
+        self.last_sent[guild_id][channel_id] = last
+
         tz = pytz.timezone("Europe/Berlin")
-        timestamp = self.last_message[message.guild.id][message.channel.id].created_at.astimezone(tz).strftime("%d.%m.%Y %H:%M")
-        author = f"📸 {self.last_message[message.guild.id][message.channel.id].author.global_name}"
-        author_url = self.last_message[message.guild.id][message.channel.id].author.avatar if self.last_message[message.guild.id][message.channel.id].author.avatar is not None else self.last_message[message.guild.id][message.channel.id].author.default_avatar
-        desc = f"> {self.last_message[message.guild.id][message.channel.id].content}" if len(self.last_message[message.guild.id][message.channel.id].content) != 0 else ""
-        footer = f"🔗 #{self.last_message[message.guild.id][message.channel.id].channel.name} — 🕒 {timestamp}"
+        timestamp = last.created_at.astimezone(tz).strftime("%d.%m.%Y %H:%M")
+        author = f"📸 {last.author.global_name}"
+        author_url = last.author.avatar if last.author.avatar is not None else last.author.default_avatar
+        desc = f"> {last.content}" if len(last.content) != 0 else ""
+        footer = f"🔗 #{last.channel.name} — 🕒 {timestamp}"
         color = random.choice(COLORS)
-        
+
         embed = Embed(title=author, description=desc, color=color, title_icon_url=author_url, footer=footer)
-        
+
         embeds = [embed.StandardEmbed()]
         files = []
         i = 0
-        
+
         if not reuse:
-            if os.listdir(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}") is None:
+            if os.listdir(f"{ATTACHMENTS_SRC}/{guild_id}/{channel_id}") is None:
                 pass
             else:
-                for f in os.listdir(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}"):
+                for f in os.listdir(f"{ATTACHMENTS_SRC}/{guild_id}/{channel_id}"):
                     if i == 0:
                         embeds.pop(0)
                         embed.image_url = f"attachment://{f}"
                         embeds.append(embed.BigEmbed())
-                    
+
                     embed_n = Embed(title=author, color=color, title_icon_url=author_url, footer=footer, image_url=f"attachment://{f}")
-                    
+
                     if i != 0:
                         embeds.append(embed_n.BigEmbed())
-                    files.append(discord.File(f"{ATTACHMENTS_SRC}/{message.guild.id}/{message.channel.id}/{f}"))
+                    files.append(discord.File(f"{ATTACHMENTS_SRC}/{guild_id}/{channel_id}/{f}"))
                     i += 1
-                
+
         if reuse:
-            embed_urls = [embed.image.url for embed in self.last_sent_from_bot[message.guild.id][message.channel.id].embeds]
+            embed_urls = [embed.image.url for embed in self.last_sent_from_bot[guild_id][channel_id].embeds]
             for url in embed_urls:
                 if i == 0:
                     embeds.pop(0)
                     embed.image_url = url
                     embeds.append(embed.BigEmbed())
-                
+
                 embed_n = Embed(title=author, color=color, title_icon_url=author_url, footer=footer, image_url=url)
-                
+
                 if i != 0:
                     embeds.append(embed_n.BigEmbed())
                 i += 1
-                
+
         MESSAGES_SNIPED.inc(1)
-        self.last_sent_from_bot[message.guild.id][message.channel.id] = await message.channel.send(embeds=embeds, files=files if reuse is False else None)
+        self.last_sent_from_bot[guild_id][channel_id] = await message.channel.send(embeds=embeds, files=files if reuse is False else None)
         
+    async def _persist_attachments(self, message: discord.Message):
+        guild_dir = f"{ATTACHMENTS_SRC}/{message.guild.id}"
+        channel_dir = f"{guild_dir}/{message.channel.id}"
+
+        if not os.path.exists(ATTACHMENTS_SRC):
+            os.mkdir(ATTACHMENTS_SRC)
+
+        if not os.path.exists(guild_dir):
+            os.mkdir(guild_dir)
+
+        if not os.path.exists(channel_dir):
+            os.mkdir(channel_dir)
+
+        for f in os.listdir(channel_dir):
+            os.remove(f"{channel_dir}/{f}")
+
+        if message.attachments:
+            i = 1
+            for attachment in message.attachments:
+                if attachment.filename.endswith(tuple(image_exts)):
+                    _, extension = os.path.splitext(attachment.filename)
+                    await attachment.save(fp=f"{channel_dir}/{i}{extension}")
+                i += 1
+
+    async def _message_from_history(self, doc: dict):
+        try:
+            channel = self.bot.get_channel(doc["channel_id"]) or await self.bot.fetch_channel(doc["channel_id"])
+        except discord.HTTPException:
+            return None
+
+        author = self.bot.get_user(doc["author_id"])
+        if author is None:
+            try:
+                author = await self.bot.fetch_user(doc["author_id"])
+            except discord.HTTPException:
+                return None
+
+        return SimpleNamespace(
+            id=doc["_id"],
+            content=doc["content"],
+            created_at=discord.utils.snowflake_time(doc["_id"]),
+            author=author,
+            channel=channel,
+            guild=channel.guild,
+            attachments=[],
+        )
+
+    def _remember_last_message(self, message: discord.Message):
+        if not self.last_message.get(message.guild.id):
+            self.last_message[message.guild.id] = {}
+
+        if not self.last_message[message.guild.id].get(message.channel.id):
+            self.last_message[message.guild.id][message.channel.id] = None
+
+        self.last_message[message.guild.id][message.channel.id] = message
+
     @commands.Cog.listener(name="on_message_delete")
     async def save(self, message: discord.Message):
         if self.bot.user.id == message.author.id \
         or message.guild is None \
         or len(message.embeds) != 0:
             return
-                
-        if not os.path.exists(ATTACHMENTS_SRC):
-            os.mkdir(ATTACHMENTS_SRC)
-            
-        if not os.path.exists("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id))):
-            os.mkdir("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id)))
-            
-        if not os.path.exists("{}/{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id))):
-            os.mkdir("{}/{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id)))
-        
-        for f in os.listdir(f"{ATTACHMENTS_SRC}/{str(message.guild.id)}/{str(message.channel.id)}"):
-            os.remove(f"{ATTACHMENTS_SRC}/{str(message.guild.id)}/{str(message.channel.id)}/{f}")
-        
-        if message.attachments:
-            i = 1
-            for attachment in message.attachments:
-                if attachment.filename.endswith(tuple(image_exts)):
-                    _, extension = os.path.splitext(attachment.filename)
-                    await attachment.save(fp="{}/{}/{}/{}{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id), i, extension))
-                i += 1
-        
-        if not self.last_message.get(message.guild.id):
-            self.last_message[message.guild.id] = {}
-            
-        if not self.last_message[message.guild.id].get(message.channel.id):
-            self.last_message[message.guild.id][message.channel.id] = None
 
-        self.last_message[message.guild.id][message.channel.id] = message
-        
+        await self._persist_attachments(message)
+        self._remember_last_message(message)
+
     @commands.Cog.listener(name="on_raw_message_delete")
     async def save_raw(self, payload: discord.RawMessageDeleteEvent):
-        
-        message = None
 
         if payload.cached_message is not None:
-            return        
-        
-        channel = await self.bot.fetch_channel(payload.channel_id)
-        
-        if not self.bot.message_cache.get(channel.id):
             return
-        
-        for msg in self.bot.message_cache[channel.id]:
-            if msg.id == payload.message_id:
-                message = msg
-                break
-        
+
+        doc = self.message_history.get(payload.message_id)
+
+        if doc is None:
+            return
+
+        if doc["author_id"] == self.bot.user.id:
+            return
+
+        if doc.get("has_embeds"):
+            return
+
+        message = await self._message_from_history(doc)
+
         if message is None:
             return
-            
-        if self.bot.user.id == message.author.id:
-            return
-        
-        if message.guild is None:
-            return
-        
-        if len(message.embeds) != 0:
-            return
-                
-        if not os.path.exists(ATTACHMENTS_SRC):
-            os.mkdir(ATTACHMENTS_SRC)
-            
-        if not os.path.exists("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id))):
-            os.mkdir("{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id)))
-            
-        if not os.path.exists("{}/{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id))):
-            os.mkdir("{}/{}/{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id)))
-        
-        for f in os.listdir(f"{ATTACHMENTS_SRC}/{str(message.guild.id)}/{str(message.channel.id)}"):
-            os.remove(f"{ATTACHMENTS_SRC}/{str(message.guild.id)}/{str(message.channel.id)}/{f}")
-        
-        if message.attachments:
-            i = 1
-            for attachment in message.attachments:
-                if attachment.filename.endswith(tuple(image_exts)):
-                    _, extension = os.path.splitext(attachment.filename)
-                    await attachment.save(fp="{}/{}/{}/{}{}".format(ATTACHMENTS_SRC, str(message.guild.id), str(message.channel.id), i, extension))
-                i += 1
-        
-        if not self.last_message.get(message.guild.id):
-            self.last_message[message.guild.id] = {}
-            
-        if not self.last_message[message.guild.id].get(message.channel.id):
-            self.last_message[message.guild.id][message.channel.id] = None
 
-        self.last_message[message.guild.id][message.channel.id] = message
+        await self._persist_attachments(message)
+        self._remember_last_message(message)
 
     
     @commands.Cog.listener("on_message")
@@ -448,31 +464,28 @@ class Events(commands.Cog):
         or await Antispam().spamming(message):
             return
         
-        pattern = r'(@someone)'
-        
-        res = re.findall(pattern, message.content)
+        res = SOMEONE_PATTERN.findall(message.content)
         
         if len(res) == 0:
             return            
         
         members: list = message.guild.members
-        
-        pre: discord.Member = random.choice(members)
+
         the_choosen_one = None
-        
-        i = 0
-        
-        while the_choosen_one is None:
+
+        for i in range(9):
             if i > 0:
-                time.sleep(3)
+                await asyncio.sleep(3)
+            pre: discord.Member = random.choice(members)
             if pre.bot:
-                pre = random.choice(members)
                 continue
             the_choosen_one = pre
-            if i > 8:
-                await message.reply("Ich konnte keinen Nutzer finden...")
-                return
-            
+            break
+
+        if the_choosen_one is None:
+            await message.reply("Ich konnte keinen Nutzer finden...")
+            return
+
         if message.guild.id == 1247839863408164868:
             file = discord.File("./images/MeisterKellerWaehltDich.png", "bild.png")
             await message.reply(silent=True, content=f"Ich wähle dich {the_choosen_one.mention}!", file=file)

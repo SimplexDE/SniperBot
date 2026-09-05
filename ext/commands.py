@@ -1,6 +1,6 @@
 import discord
 import random
-import time
+import asyncio
 from discord.ext import commands
 from discord import app_commands
 
@@ -120,23 +120,21 @@ class Commands(commands.Cog):
     async def random(self, interaction: discord.Interaction):
 
         members: list = interaction.guild.members
-        
-        pre: discord.Member = random.choice(members)
+
         the_choosen_one = None
-        
-        i = 0
-        
-        while the_choosen_one is None:
+
+        for i in range(9):
             if i > 0:
-                time.sleep(3)
+                await asyncio.sleep(3)
+            pre: discord.Member = random.choice(members)
             if pre.bot:
-                pre = random.choice(members)
                 continue
             the_choosen_one = pre
-            if i > 8:
-                await interaction.response.send_message("Ich konnte keinen Nutzer finden...")
-                return
-            
+            break
+
+        if the_choosen_one is None:
+            await interaction.response.send_message("Ich konnte keinen Nutzer finden...")
+            return
 
         embed = Embed(
             title="Random | Member-Selector",
@@ -279,7 +277,7 @@ class Commands(commands.Cog):
         settings = db_guild.settings
         
         fields = [
-            (f"{Emote.ARROW_RIGHT} Channel", f"> `N/A` {Emote.EDIT}", False),
+            (f"{Emote.RIGHT_ARROW} Channel", f"> `N/A` {Emote.EDIT}", False),
             ]
         
         embed = Embed(
