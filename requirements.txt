@@ -11,7 +11,7 @@ cffi==2.1.0
 charset-normalizer==3.4.9
 cleo==2.2.1
 crashtest==0.4.1
-cryptography==49.0.0
+cryptography==50.0.0
 discord.py==2.7.1
 distlib==0.4.3
 dnspython==2.8.0
