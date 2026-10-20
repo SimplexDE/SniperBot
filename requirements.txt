@@ -34,7 +34,7 @@ loguru==0.7.3
 loki-logger-handler==1.1.2
 more-itertools==11.1.0
 msgpack==1.2.1
-multidict==6.7.1
+multidict==6.9.1
 pbs-installer==2026.7.18
 pillow==12.3.0
 pipenv==2026.6.2
